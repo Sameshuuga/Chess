@@ -5,16 +5,18 @@ local Square = Object:extend()
 -- ChessBoard
 -----------------------------------------------------------
 function ChessBoard:new(w, h, center, squareSize)
-    --[=[ ChessBoard object. Specify the width and height
+        --[=[ ChessBoard object. Specify the width and height
             in squares. Specify the center coordinates of
-            he board. Specify the square size as pixels 
+            he board. Specify the square size as pixels
             wide/tall.]=]
+            
     self.board_colors = love.graphics.newImage('images/chess_set/board_colors.png')
-    self.imageSquareSize = self.board_colors:getHeight()
-    print('Board color image W x H: ',self.board_colors:getWidth(),self.imageSquareSize)
+    -- print('Board color image W x H: ',self.board_colors:getWidth(),self.board_colors:getHeight())
     self.width  = w
     self.height = h
+    self.imageSquareSize = self.board_colors:getHeight()
     self.squareSize = squareSize
+    self.scalefactor = self.squareSize / self.imageSquareSize
 
     -- Top-left corner (what you called "topRight")
     self.topLeft = {
@@ -45,8 +47,8 @@ function ChessBoard:new(w, h, center, squareSize)
             -- Toggle color each square
             color = (color == 1) and 2 or 1
             local id = { row = row, column = column }
-            -- print(id.row,id.column)
-            table.insert(squarelist,Square(id, x, y, squareSize, color,self.board_colors))
+            -- print(id.row,id.column) 
+            table.insert(squarelist,Square(id, x, y, self.imageSquareSize, color,self.board_colors))
             x = x + squareSize
         end
 
@@ -62,7 +64,7 @@ end
 function ChessBoard:draw()
     for r, row in ipairs(self.squares) do
         for i, square in ipairs(row) do
-            square:draw(self.board_colors)
+            square:draw(self.board_colors, self.scalefactor)
         end
     end
 end
@@ -71,36 +73,37 @@ end
 -----------------------------------------------------------
 -- Square
 -----------------------------------------------------------
-function Square:new(id, x, y, size, color,image)
+function Square:new(id, x, y, squareSize, color,image)
 
     -- set quad to draw color
     if color == 1 then
-    self.quad = love.graphics.newQuad(0,0,size,size,image)
+    self.quad = love.graphics.newQuad(0,0,squareSize,squareSize,image)
     else
-    self.quad = love.graphics.newQuad(0+size,0,28,28,image)
+    self.quad = love.graphics.newQuad(0+squareSize,0,squareSize,squareSize,image)
     end
 
     self.id = id
     self.x = x
     self.y = y
-    self.size = size
+    self.size = squareSize
     self.color = color
 
     -- Boundaries for potential interactions
     self.top = y
-    self.bottom = y + size
+    self.bottom = y + squareSize
     self.left = x
-    self.right = x + size
+    self.right = x + squareSize
 
 end
 
-function Square:draw(image)
+function Square:draw(image,scale)
     love.graphics.draw(
         image, 
         self.quad,
         self.x,
         self.y,
-        0
+        0,
+        scale
 
     )
 end

@@ -22,6 +22,7 @@ function ChessPeice:new(color, image, x, y, squareSize)
     -- set image and scaling factor
     self.image = love.graphics.newImage(string.format('images/chess_set/%s/%s', self.color, image))
     self.scalefactor = squareSize / self.image:getWidth()
+    print(self.scalefactor)
 
     -- default attributes
     self.x = x; self.y = y
@@ -43,32 +44,32 @@ end
 ---------------------------------------------------------------------------------------
 ----------------------------- sub classses --------------------------------------------
 function Pawn:new(color, x, y, squareSize)
-    Pawn.super:new(color, 'pawn.png', x, y, squareSize)
+    Pawn.super.new(self,color, 'pawn.png', x, y, squareSize)
     self.type = 'pawn'
 end
 
 function Knight:new(color, x, y, squareSize)
-    Knight.super:new(color, 'knight.png', x, y, squareSize)
+    Knight.super.new(self,color, 'knight.png', x, y, squareSize)
     self.type = 'knight'
 end
 
 function Bishop:new(color, x, y, squareSize)
-    Bishop.super:new(color, 'bishop.png', x, y, squareSize)
+    Bishop.super.new(self,color, 'bishop.png', x, y, squareSize)
     self.type = 'bishop'
 end
 
 function Rook:new(color, x, y, squareSize)
-    Rook.super:new(color, 'rook.png', x, y, squareSize)
+    Rook.super.new(self,color, 'rook.png', x, y, squareSize)
     self.type = 'rook'
 end
 
 function Queen:new(color, x, y, squareSize)
-    Queen.super:new(color, 'queen.png', x, y, squareSize)
+    Queen.super.new(self,color, 'queen.png', x, y, squareSize)
     self.type = 'queen'
 end
 
-function King:new(color, x, y, squareSize)
-    King.super:new(color, 'king.png', x, y, squareSize)
+function King.new(self,color, x, y, squareSize)
+    King.super.new(self,color, 'king.png', x, y, squareSize)
     self.type = 'king'
 end
 

@@ -25,51 +25,61 @@ function ChessPeice:new(color, image, x, y, squareSize)
     print(self.scalefactor)
 
     -- default attributes
+    self.squareSize = squareSize
     self.x = x; self.y = y
     self.top = self.y; self.left = self.x
     self.bottom = self.y + squareSize; self.right = self.x + squareSize
+
+    -- state flags
+    self.moving = false
 
 
     print('ChessSet Image W x H: ', self.image:getWidth(), self.image:getHeight())
 end
 
-function ChessPeice:move()
-    
+function ChessPeice:update(dt)
+    if self.moving == true then
+        local x, y = love.mouse.getPosition()
+        self.x = x - self.scalefactor * self.image:getWidth() / 2
+        self.y = y - self.scalefactor * self.image:getHeight() / 2
+        self.top = self.y; self.left = self.x
+        self.bottom = self.y + self.squareSize; self.right = self.x + self.squareSize
+    end
 end
 
 function ChessPeice:draw()
-    love.graphics.draw(self.image, self.x, self.y,0,self.scalefactor)
+    love.graphics.draw(self.image, self.x, self.y, 0, self.scalefactor)
 end
 
 ---------------------------------------------------------------------------------------
 ----------------------------- sub classses --------------------------------------------
 function Pawn:new(color, x, y, squareSize)
-    Pawn.super.new(self,color, 'pawn.png', x, y, squareSize)
+    Pawn.super.new(self, color, 'pawn.png', x, y, squareSize)
     self.type = 'pawn'
 end
 
 function Knight:new(color, x, y, squareSize)
-    Knight.super.new(self,color, 'knight.png', x, y, squareSize)
+    Knight.super.new(self, color, 'knight.png', x, y, squareSize)
     self.type = 'knight'
 end
 
 function Bishop:new(color, x, y, squareSize)
-    Bishop.super.new(self,color, 'bishop.png', x, y, squareSize)
+    Bishop.super.new(self, color, 'bishop.png', x, y, squareSize)
     self.type = 'bishop'
 end
 
 function Rook:new(color, x, y, squareSize)
-    Rook.super.new(self,color, 'rook.png', x, y, squareSize)
+    Rook.super.new(self, color, 'rook.png', x, y, squareSize)
     self.type = 'rook'
 end
 
 function Queen:new(color, x, y, squareSize)
-    Queen.super.new(self,color, 'queen.png', x, y, squareSize)
+    Queen.super.new(self, color, 'queen.png', x, y, squareSize)
     self.type = 'queen'
 end
 
-function King.new(self,color, x, y, squareSize)
-    King.super.new(self,color, 'king.png', x, y, squareSize)
+function King.new(self, color, x, y, squareSize)
+    King.super.new(self, color, 'king.png', x, y, squareSize)
     self.type = 'king'
 end
 

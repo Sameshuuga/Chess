@@ -31,6 +31,11 @@ end
 
 function love.update(dt)
 
+    for i, list in ipairs(peicelist) do
+        for v, peice in ipairs(list) do
+            peice:update(dt)
+        end
+    end
 end
 
 function love.draw()
@@ -38,20 +43,38 @@ function love.draw()
     for i, list in ipairs(peicelist) do
         for v, peice in ipairs(list) do
             peice:draw()
-            -- print(peice.type)
         end
     end
 end
 
 function love.mousepressed(mx, my)
-
     for i, list in ipairs(peicelist) do
         -- detect when a peice is clicked
         for v, peice in ipairs(list) do
             if mx >= peice.left and mx < peice.right and
                 my >= peice.top and my < peice.bottom then
+                peice.moving = true
                 print("Peice Clicked")
             end
         end
     end
+end
+
+function love.mousereleased(mx, my)
+    for i, list in ipairs(peicelist) do
+        -- detect when a peice is dropped
+        for v, peice in ipairs(list) do
+            if mx >= peice.left and mx < peice.right and
+                my >= peice.top and my < peice.bottom then
+                peice.moving = false
+                print("Peice Released")
+            end
+        end
+    end
+end
+
+function love.keypressed(key)
+    if key == "escape" then
+        love.event.quit()
+    end   
 end

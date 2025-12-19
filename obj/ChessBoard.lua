@@ -4,40 +4,38 @@ local Square = Object:extend()
 -----------------------------------------------------------
 -- ChessBoard
 -----------------------------------------------------------
-function ChessBoard:new(w, h, center, squareSize)
+function ChessBoard:new(center, squareSize, w, h)
     --[=[ ChessBoard object. Specify the width and height
-            in squares. Specify the center coordinates of
+            in squares (defaluts to 8 x 8). Specify the center coordinates of
             he board. Specify the square size as pixels
             wide/tall.]=]
 
-    self.board_colors    = love.graphics.newImage('images/chess_set/board_colors.png')
     -- print('Board color image W x H: ',self.board_colors:getWidth(),self.board_colors:getHeight())
-    self.width           = w
-    self.height          = h
-    self.imageSquareSize = self.board_colors:getHeight()
+    self.width           = w or 8
+    self.height          = h or 8 
     self.squareSize      = squareSize
-    self.scalefactor     = self.squareSize / self.imageSquareSize
 
-    -- Top-left corner (what you called "topRight")
+    -- Top-left corner
+    self.center = center
     self.topLeft         = {
-        x = center.x - (w * squareSize) / 2,
-        y = center.y - (h * squareSize) / 2
+        x = self.center.x - (self.width * self.squareSize) / 2,
+        y = self.center.y - (self.height * self.squareSize) / 2
     }
 
     -- Build array
     self.rows            = {}
     self.columns         = {}
-    for i = 1, w do -- row numbers
+    for i = 1, self.width do -- row numbers
         self.rows[i] = i
     end
-    for i = 0, h - 1 do -- column letters
+    for i = 0, self.height - 1 do -- column letters
         self.columns[i + 1] = string.char(string.byte("a") + i)
     end
 
     -- Build grid of Square objects
     self.squares = {}
     local y = self.topLeft.y
-    local color = 1
+    local color = 'dark'
 
     for r, row in ipairs(self.rows) do
         local squarelist = {}
@@ -45,15 +43,15 @@ function ChessBoard:new(w, h, center, squareSize)
 
         for c, column in ipairs(self.columns) do
             -- Toggle color each square
-            color = (color == 1) and 2 or 1
+            color = (color == 'dark') and 'light' or 'dark'
             local id = { row = row, column = column }
             -- print(id.row,id.column)
-            table.insert(squarelist, Square(id, x, y, self.squareSize, color, self.board_colors))
+            table.insert(squarelist, Square(id, x, y, self.squareSize, color))
             x = x + squareSize
         end
 
         -- Toggle again each row to ensure checkerboard pattern stays aligned
-        color = (color == 1) and 2 or 1
+        color = (color == 'dark') and 'light' or 'dark'
 
         table.insert(self.squares, squarelist)
         y = y + squareSize
@@ -71,19 +69,16 @@ end
 -----------------------------------------------------------
 -- Square
 -----------------------------------------------------------
-function Square:new(id, x, y, squareSize, color, image)
+function Square:new(id, x, y, squareSize, color)
     -- set quad to draw color
-    if color == 1 then
-        self.quad = love.graphics.newQuad(0, 0, squareSize, squareSize, image)
-    else
-        self.quad = love.graphics.newQuad(0 + squareSize, 0, squareSize, squareSize, image)
-    end
+    self.color = color
+    self.image = love.graphics.newImage(string.format('images/chess_set/%s_square.png', self.color))
+    self.scalingfactor = squareSize/self.image:getWidth()
 
     self.id = id
     self.x = x
     self.y = y
     self.size = squareSize
-    self.color = color
 
     -- Boundaries for potential interactions
     self.center = { x = self.x + self.size / 2, y = self.y + self.size / 2 }
@@ -94,15 +89,7 @@ function Square:new(id, x, y, squareSize, color, image)
 end
 
 function Square:draw(image, scale)
-    love.graphics.draw(
-        image,
-        self.quad,
-        self.x,
-        self.y,
-        0,
-        scale
-
-    )
+    love.graphics.draw(self.image, self.x, self.y,0,self.scalingfactor)
 end
 
 return ChessBoard

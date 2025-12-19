@@ -10,6 +10,7 @@ local Screen = require "obj.screen"
 local ChessBoard = require "obj.ChessBoard"
 local ChessSet = require "obj.ChessSet"
 
+local screen, board
 local lightpiecelist = {}
 local darkpeicelist = {}
 local peicelist = { lightpiecelist, darkpeicelist }
@@ -18,7 +19,7 @@ local squareSize = 50
 
 function love.load()
     screen = Screen()
-    board = ChessBoard(8, 8, screen.center, squareSize)
+    board = ChessBoard(screen.center, squareSize)
     table.insert(darkpeicelist, ChessSet.Pawn('dark', 20, 20, squareSize))
     table.insert(darkpeicelist, ChessSet.Queen('dark', 120, 20, squareSize))
     table.insert(lightpiecelist, ChessSet.Pawn('light', 20, 120, squareSize))
@@ -67,8 +68,9 @@ function love.mousereleased(mx, my)
                 my >= peice.top and my < peice.bottom then
                 peice.moving = false
                 for i, squarelist in ipairs(board.squares) do
+                    -- snap to nearest square
                     for v, square in ipairs(squarelist) do
-                        local margin = 2
+                        local margin = 0
                         if square.center.x >= peice.left + margin and square.center.x < peice.right - margin and
                             square.center.y >= peice.top and square.center.y + margin < peice.bottom - margin then
                             peice.x = square.x; peice.y = square.y
@@ -76,7 +78,6 @@ function love.mousereleased(mx, my)
                         end
                     end
                 end
-
                 print("Peice Released")
             end
         end

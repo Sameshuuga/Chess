@@ -8,7 +8,7 @@ local King = ChessPeice:extend()
 
 function ChessPeice:new(color, image, x, y, squareSize)
     --[=[ Class for creation of chesspeices. Each peice is a subclass of ChessPeice. Pass
-        color, loaction (x,y), and squareSize]=]
+        color, loaction of the center point (x,y), and squareSize]=]
 
     -- set image path based on color
     if color == 'white' or color == 'light' then
@@ -26,7 +26,8 @@ function ChessPeice:new(color, image, x, y, squareSize)
 
     -- default attributes
     self.squareSize = squareSize
-    self.x = x; self.y = y
+    self.center = {x=x,y=y}
+    self.x = self.center.x-self.squareSize/2; self.y = self.center.y-self.squareSize/2
     self.top = self.y; self.left = self.x
     self.bottom = self.y + squareSize; self.right = self.x + squareSize
 
@@ -40,11 +41,13 @@ end
 function ChessPeice:update(dt)
     if self.moving == true then
         local x, y = love.mouse.getPosition()
-        self.x = x - self.scalefactor * self.image:getWidth() / 2
-        self.y = y - self.scalefactor * self.image:getHeight() / 2
-        self.top = self.y; self.left = self.x
-        self.bottom = self.y + self.squareSize; self.right = self.x + self.squareSize
+        self.x = x - self.squareSize/2
+        self.y = y - self.squareSize/2
     end
+    
+    self.top = self.y; self.left = self.x
+    self.bottom = self.y + self.squareSize; self.right = self.x + self.squareSize
+
 end
 
 function ChessPeice:draw()

@@ -5,28 +5,28 @@ local Square = Object:extend()
 -- ChessBoard
 -----------------------------------------------------------
 function ChessBoard:new(w, h, center, squareSize)
-        --[=[ ChessBoard object. Specify the width and height
+    --[=[ ChessBoard object. Specify the width and height
             in squares. Specify the center coordinates of
             he board. Specify the square size as pixels
             wide/tall.]=]
-            
-    self.board_colors = love.graphics.newImage('images/chess_set/board_colors.png')
+
+    self.board_colors    = love.graphics.newImage('images/chess_set/board_colors.png')
     -- print('Board color image W x H: ',self.board_colors:getWidth(),self.board_colors:getHeight())
-    self.width  = w
-    self.height = h
+    self.width           = w
+    self.height          = h
     self.imageSquareSize = self.board_colors:getHeight()
-    self.squareSize = squareSize
-    self.scalefactor = self.squareSize / self.imageSquareSize
+    self.squareSize      = squareSize
+    self.scalefactor     = self.squareSize / self.imageSquareSize
 
     -- Top-left corner (what you called "topRight")
-    self.topLeft = {
+    self.topLeft         = {
         x = center.x - (w * squareSize) / 2,
         y = center.y - (h * squareSize) / 2
     }
 
     -- Build array
-    self.rows = {}
-    self.columns = {}
+    self.rows            = {}
+    self.columns         = {}
     for i = 1, w do -- row numbers
         self.rows[i] = i
     end
@@ -47,18 +47,17 @@ function ChessBoard:new(w, h, center, squareSize)
             -- Toggle color each square
             color = (color == 1) and 2 or 1
             local id = { row = row, column = column }
-            -- print(id.row,id.column) 
-            table.insert(squarelist,Square(id, x, y, self.imageSquareSize, color,self.board_colors))
+            -- print(id.row,id.column)
+            table.insert(squarelist, Square(id, x, y, self.squareSize, color, self.board_colors))
             x = x + squareSize
         end
 
         -- Toggle again each row to ensure checkerboard pattern stays aligned
         color = (color == 1) and 2 or 1
 
-        table.insert(self.squares,squarelist)
+        table.insert(self.squares, squarelist)
         y = y + squareSize
     end
-
 end
 
 function ChessBoard:draw()
@@ -69,17 +68,15 @@ function ChessBoard:draw()
     end
 end
 
-
 -----------------------------------------------------------
 -- Square
 -----------------------------------------------------------
-function Square:new(id, x, y, squareSize, color,image)
-
+function Square:new(id, x, y, squareSize, color, image)
     -- set quad to draw color
     if color == 1 then
-    self.quad = love.graphics.newQuad(0,0,squareSize,squareSize,image)
+        self.quad = love.graphics.newQuad(0, 0, squareSize, squareSize, image)
     else
-    self.quad = love.graphics.newQuad(0+squareSize,0,squareSize,squareSize,image)
+        self.quad = love.graphics.newQuad(0 + squareSize, 0, squareSize, squareSize, image)
     end
 
     self.id = id
@@ -89,16 +86,16 @@ function Square:new(id, x, y, squareSize, color,image)
     self.color = color
 
     -- Boundaries for potential interactions
+    self.center = { x = self.x + self.size / 2, y = self.y + self.size / 2 }
     self.top = y
     self.bottom = y + squareSize
     self.left = x
     self.right = x + squareSize
-
 end
 
-function Square:draw(image,scale)
+function Square:draw(image, scale)
     love.graphics.draw(
-        image, 
+        image,
         self.quad,
         self.x,
         self.y,

@@ -30,7 +30,6 @@ function love.load()
 end
 
 function love.update(dt)
-
     for i, list in ipairs(peicelist) do
         for v, peice in ipairs(list) do
             peice:update(dt)
@@ -67,6 +66,17 @@ function love.mousereleased(mx, my)
             if mx >= peice.left and mx < peice.right and
                 my >= peice.top and my < peice.bottom then
                 peice.moving = false
+                for i, squarelist in ipairs(board.squares) do
+                    for v, square in ipairs(squarelist) do
+                        local margin = 2
+                        if square.center.x >= peice.left + margin and square.center.x < peice.right - margin and
+                            square.center.y >= peice.top and square.center.y + margin < peice.bottom - margin then
+                            peice.x = square.x; peice.y = square.y
+                            -- peice.x = square.center.x - squareSize/2; peice.y = square.center.y - squareSize/2
+                        end
+                    end
+                end
+
                 print("Peice Released")
             end
         end
@@ -76,5 +86,5 @@ end
 function love.keypressed(key)
     if key == "escape" then
         love.event.quit()
-    end   
+    end
 end

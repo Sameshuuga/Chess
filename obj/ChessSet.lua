@@ -6,7 +6,7 @@ local Rook = ChessPeice:extend()
 local Queen = ChessPeice:extend()
 local King = ChessPeice:extend()
 
-function ChessPeice:new(color, image, x, y, squareSize)
+function ChessPeice:new(color, image, x, y, squareSize, location)
     --[=[ Class for creation of chesspeices. Each peice is a subclass of ChessPeice. Pass
         color, loaction of the center point (x,y), and squareSize]=]
 
@@ -18,36 +18,32 @@ function ChessPeice:new(color, image, x, y, squareSize)
     else
         error('Invalid color')
     end
-
     -- set image and scaling factor
     self.image = love.graphics.newImage(string.format('images/chess_set/%s/%s', self.color, image))
     self.scalefactor = squareSize / self.image:getWidth()
-    print(self.scalefactor)
 
     -- default attributes
     self.squareSize = squareSize
-    self.center = {x=x,y=y}
-    self.x = self.center.x-self.squareSize/2; self.y = self.center.y-self.squareSize/2
+    self.center = { x = x, y = y }
+    self.x = self.center.x - self.squareSize / 2; self.y = self.center.y - self.squareSize / 2
     self.top = self.y; self.left = self.x
     self.bottom = self.y + squareSize; self.right = self.x + squareSize
 
-    -- state flags
+    -- state info
     self.moving = false
+    self.location = location
 
-
-    print('ChessSet Image W x H: ', self.image:getWidth(), self.image:getHeight())
 end
 
 function ChessPeice:update(dt)
     if self.moving == true then
         local x, y = love.mouse.getPosition()
-        self.x = x - self.squareSize/2
-        self.y = y - self.squareSize/2
+        self.x = x - self.squareSize / 2
+        self.y = y - self.squareSize / 2
     end
-    
+
     self.top = self.y; self.left = self.x
     self.bottom = self.y + self.squareSize; self.right = self.x + self.squareSize
-
 end
 
 function ChessPeice:draw()
@@ -56,8 +52,8 @@ end
 
 ---------------------------------------------------------------------------------------
 ----------------------------- sub classses --------------------------------------------
-function Pawn:new(color, x, y, squareSize)
-    Pawn.super.new(self, color, 'pawn.png', x, y, squareSize)
+function Pawn:new(color, x, y, squareSize, loaction)
+    Pawn.super.new(self, color, 'pawn.png', x, y, squareSize, loaction)
     self.type = 'pawn'
 end
 

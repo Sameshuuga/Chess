@@ -11,24 +11,24 @@ function ChessBoard:new(center, squareSize, w, h)
             wide/tall.]=]
 
     -- print('Board color image W x H: ',self.board_colors:getWidth(),self.board_colors:getHeight())
-    self.width           = w or 8
-    self.height          = h or 8 
-    self.squareSize      = squareSize
+    self.width      = w or 8
+    self.height     = h or 8
+    self.squareSize = squareSize
 
     -- Top-left corner
-    self.center = center
-    self.topLeft         = {
+    self.center     = center
+    self.topLeft    = {
         x = self.center.x - (self.width * self.squareSize) / 2,
         y = self.center.y - (self.height * self.squareSize) / 2
     }
 
     -- Build array
-    self.rows            = {}
-    self.columns         = {}
-    for i = 1, self.width do -- row numbers
-        self.rows[i] = i
+    self.rows       = {}
+    self.columns    = {}
+    for i = 1, self.height do
+        self.rows[i] = self.height - i + 1
     end
-    for i = 0, self.height - 1 do -- column letters
+    for i = 0, self.width - 1 do
         self.columns[i + 1] = string.char(string.byte("a") + i)
     end
 
@@ -73,7 +73,7 @@ function Square:new(id, x, y, squareSize, color)
     -- set quad to draw color
     self.color = color
     self.image = love.graphics.newImage(string.format('images/chess_set/%s_square.png', self.color))
-    self.scalingfactor = squareSize/self.image:getWidth()
+    self.scalingfactor = squareSize / self.image:getWidth()
 
     self.id = id
     self.x = x
@@ -89,7 +89,7 @@ function Square:new(id, x, y, squareSize, color)
 end
 
 function Square:draw(image, scale)
-    love.graphics.draw(self.image, self.x, self.y,0,self.scalingfactor)
+    love.graphics.draw(self.image, self.x, self.y, 0, self.scalingfactor)
 end
 
 return ChessBoard

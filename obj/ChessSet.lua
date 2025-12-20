@@ -31,7 +31,7 @@ function ChessPeice:new(color, image, x, y, squareSize, location)
 
     -- state info
     self.moving = false
-    self.location = location
+    self.location = {column = location[1], row=location[2]}
 
 end
 
@@ -57,28 +57,28 @@ function Pawn:new(color, x, y, squareSize, loaction)
     self.type = 'pawn'
 end
 
-function Knight:new(color, x, y, squareSize)
-    Knight.super.new(self, color, 'knight.png', x, y, squareSize)
+function Knight:new(color, x, y, squareSize,location)
+    Knight.super.new(self, color, 'knight.png', x, y, squareSize,location)
     self.type = 'knight'
 end
 
-function Bishop:new(color, x, y, squareSize)
-    Bishop.super.new(self, color, 'bishop.png', x, y, squareSize)
+function Bishop:new(color, x, y, squareSize,location)
+    Bishop.super.new(self, color, 'bishop.png', x, y, squareSize,location)
     self.type = 'bishop'
 end
 
-function Rook:new(color, x, y, squareSize)
-    Rook.super.new(self, color, 'rook.png', x, y, squareSize)
+function Rook:new(color, x, y, squareSize,location)
+    Rook.super.new(self, color, 'rook.png', x, y, squareSize,location)
     self.type = 'rook'
 end
 
-function Queen:new(color, x, y, squareSize)
-    Queen.super.new(self, color, 'queen.png', x, y, squareSize)
+function Queen:new(color, x, y, squareSize,location)
+    Queen.super.new(self, color, 'queen.png', x, y, squareSize,location)
     self.type = 'queen'
 end
 
-function King.new(self, color, x, y, squareSize)
-    King.super.new(self, color, 'king.png', x, y, squareSize)
+function King.new(self, color, x, y, squareSize,location)
+    King.super.new(self, color, 'king.png', x, y, squareSize,location)
     self.type = 'king'
 end
 

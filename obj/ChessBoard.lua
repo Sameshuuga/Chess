@@ -44,7 +44,7 @@ function ChessBoard:new(center, squareSize, w, h)
         for c, column in ipairs(self.columns) do
             -- Toggle color each square
             color = (color == 'dark') and 'light' or 'dark'
-            local id = { row = row, column = column }
+            local id = { column = column, row = row }
             -- print(id.row,id.column)
             table.insert(squarelist, Square(id, x, y, self.squareSize, color))
             x = x + squareSize

@@ -10,33 +10,28 @@ local Screen = require "obj.screen"
 local ChessBoard = require "obj.ChessBoard"
 local ChessSet = require "obj.ChessSet"
 
-local screen
-local lightpiecelist = {}
-local darkpeicelist = {}
-
+screen = nil
 board = nil
-piecelist = { lightpiecelist, darkpeicelist }
+Lightpiecelist = {}
+Darkpeicelist = {}
+Piecelist = { Lightpiecelist, Darkpeicelist }
 
 local squareSize = 50
 
 function love.load()
     screen = Screen()
     board = ChessBoard(screen.center, squareSize)
-    table.insert(darkpeicelist, ChessSet.Pawn('dark', 20, 20, squareSize, {'a',1}))
-    table.insert(darkpeicelist, ChessSet.Queen('dark', 120, 20, squareSize))
-    table.insert(lightpiecelist, ChessSet.Pawn('light', 20, 120, squareSize))
-    table.insert(lightpiecelist, ChessSet.Knight('light', 120, 120, squareSize))
-    
-    print (darkpeicelist[1].location[1])
+    -- table.insert(darkpeicelist, ChessSet.Pawn('dark', 0,0 , squareSize, {'a',7}))
+    -- table.insert(darkpeicelist, ChessSet.Queen('dark', 0, 0, squareSize, {'d',8}))
+    -- table.insert(lightpiecelist, ChessSet.Pawn('light', 0, 0, squareSize, {'a',2}))
+    -- table.insert(lightpiecelist, ChessSet.Knight('light', 0, 0, squareSize,{'b',1}))
+    -- table.insert(lightpiecelist, ChessSet.Bishop('light', 0, 0, squareSize,{'e',4}))
+    makeStartingPieces(ChessSet, squareSize)
     placePieces()
-
-    print('debug', darkpeicelist[1].left, darkpeicelist[1].right)
-
-    print(board)
 end
 
 function love.update(dt)
-    for i, list in ipairs(piecelist) do
+    for i, list in ipairs(Piecelist) do
         for v, peice in ipairs(list) do
             peice:update(dt)
         end
@@ -45,7 +40,7 @@ end
 
 function love.draw()
     board:draw()
-    for i, list in ipairs(piecelist) do
+    for i, list in ipairs(Piecelist) do
         for v, peice in ipairs(list) do
             peice:draw()
         end
@@ -53,7 +48,7 @@ function love.draw()
 end
 
 function love.mousepressed(mx, my)
-    for i, list in ipairs(piecelist) do
+    for i, list in ipairs(Piecelist) do
         -- detect when a peice is clicked
         for v, peice in ipairs(list) do
             if mx >= peice.left and mx < peice.right and
@@ -66,7 +61,7 @@ function love.mousepressed(mx, my)
 end
 
 function love.mousereleased(mx, my)
-    snapPiece(mx,my)
+    snapPiece(mx, my)
 end
 
 function love.keypressed(key)

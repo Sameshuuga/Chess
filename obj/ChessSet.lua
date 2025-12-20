@@ -8,7 +8,7 @@ local King = ChessPeice:extend()
 
 function ChessPeice:new(color, image, x, y, squareSize, location)
     --[=[ Class for creation of chesspeices. Each peice is a subclass of ChessPeice. Pass
-        color, loaction of the center point (x,y), and squareSize]=]
+        color, location of the center point (x,y), and squareSize]=]
 
     -- set image path based on color
     if color == 'white' or color == 'light' then
@@ -31,8 +31,8 @@ function ChessPeice:new(color, image, x, y, squareSize, location)
 
     -- state info
     self.moving = false
-    self.location = {column = location[1], row=location[2]}
-
+    self.active = false
+    self.location = { column = location[1], row = location[2] }
 end
 
 function ChessPeice:update(dt)
@@ -50,37 +50,191 @@ function ChessPeice:draw()
     love.graphics.draw(self.image, self.x, self.y, 0, self.scalefactor)
 end
 
+function ChessPeice:getValidMoves()
+    local validMoves = self:validMoves()
+
+    print('Valid moves: ')
+    for i, move in ipairs(validMoves) do
+        print(move.column, move.row)
+    end
+end
+
+function ChessPeice:_letterNumberSwap(value)
+    local converter = {
+        a = 1,
+        b = 2,
+        c = 3,
+        d = 4,
+        e = 5,
+        f = 6,
+        g = 7,
+        h = 8,
+        [1] = 'a',
+        [2] = 'b',
+        [3] = 'c',
+        [4] = 'd',
+        [5] = 'e',
+        [6] = 'f',
+        [7] = 'g',
+        [8] = 'h'
+    }
+    return converter[value]
+end
+
 ---------------------------------------------------------------------------------------
 ----------------------------- sub classses --------------------------------------------
-function Pawn:new(color, x, y, squareSize, loaction)
-    Pawn.super.new(self, color, 'pawn.png', x, y, squareSize, loaction)
+
+----------------------------- pawn ----------------------------------------------------
+function Pawn:new(color, x, y, squareSize, location)
+    Pawn.super.new(self, color, 'pawn.png', x, y, squareSize, location)
     self.type = 'pawn'
 end
 
-function Knight:new(color, x, y, squareSize,location)
-    Knight.super.new(self, color, 'knight.png', x, y, squareSize,location)
+function Pawn:validMoves() -- need to add double move option for fist move and limit diagonal to capture only
+    local moves = {}
+    local direction = self.color == 'light_pieces' and 1 or -1 -- Light moves up, dark moves down
+
+    -- Forward move
+    local validRow = self.location.row + direction
+    if validRow >= 1 and validRow <= 8 then
+        table.insert(moves, { column = self.location.column, row = validRow })
+    end
+
+    -- Diagonal captures 
+    for i, offset in ipairs({ -1, 1 }) do
+        local validColumn = self:_letterNumberSwap(self.location.column) + offset
+        if validColumn >= 1 and validColumn <= 8 then
+            table.insert(moves, { column = self:_letterNumberSwap(validColumn), row = validRow })
+        end
+    end
+
+    return moves
+end
+
+---------------------------------------------------------------------------------------
+----------------------------- knight ----------------------------------------------------
+function Knight:new(color, x, y, squareSize, location)
+    Knight.super.new(self, color, 'knight.png', x, y, squareSize, location)
     self.type = 'knight'
 end
 
-function Bishop:new(color, x, y, squareSize,location)
-    Bishop.super.new(self, color, 'bishop.png', x, y, squareSize,location)
+function Knight:validMoves()
+    local moves = {}
+    local offsets = {
+        { 2, 1 }, { 2, -1 }, { -2, 1 }, { -2, -1 },
+        { 1, 2 }, { 1, -2 }, { -1, 2 }, { -1, -2 }
+    }
+    for i, offset in ipairs(offsets) do
+        local validColumn = self:_letterNumberSwap(self.location.column) + offset[1]
+        local validRow = self.location.row + offset[2]
+        if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
+            table.insert(moves, { column = self:_letterNumberSwap(validColumn), row = validRow })
+        end
+    end
+    return moves
+end
+
+---------------------------------------------------------------------------------------
+----------------------------------- bishop --------------------------------------------
+function Bishop:new(color, x, y, squareSize, location)
+    Bishop.super.new(self, color, 'bishop.png', x, y, squareSize, location)
     self.type = 'bishop'
 end
 
-function Rook:new(color, x, y, squareSize,location)
-    Rook.super.new(self, color, 'rook.png', x, y, squareSize,location)
+function Bishop:validMoves()
+    local moves = {}
+    local directions = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } } -- Diagonal directions
+    for i, dir in ipairs(directions) do
+        for v = 1, 8 do
+            local validColumn = self:_letterNumberSwap(self.location.column) + dir[1] * v
+            local validRow = self.location.row + dir[2] * v
+            if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
+                table.insert(moves, { column = self:_letterNumberSwap(validColumn), row = validRow })
+            else
+                break
+            end
+        end
+    end
+    return moves
+end
+
+---------------------------------------------------------------------------------------
+----------------------------------- rook --------------------------------------------
+function Rook:new(color, x, y, squareSize, location)
+    Rook.super.new(self, color, 'rook.png', x, y, squareSize, location)
     self.type = 'rook'
 end
 
-function Queen:new(color, x, y, squareSize,location)
-    Queen.super.new(self, color, 'queen.png', x, y, squareSize,location)
+function Rook:validMoves()
+    local moves = {}
+    local directions = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } } -- Horizontal and vertical directions
+    for i, dir in ipairs(directions) do
+        for v = 1, 8 do
+            local validColumn = self:_letterNumberSwap(self.location.column) + dir[1] * v
+            local validRow = self.location.row + dir[2] * v
+            if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
+                table.insert(moves, { column = self:_letterNumberSwap(validColumn), row = validRow })
+            else
+                break
+            end
+        end
+    end
+    return moves
+end
+
+---------------------------------------------------------------------------------------
+----------------------------------- queen --------------------------------------------
+
+function Queen:new(color, x, y, squareSize, location)
+    Queen.super.new(self, color, 'queen.png', x, y, squareSize, location)
     self.type = 'queen'
 end
 
-function King.new(self, color, x, y, squareSize,location)
-    King.super.new(self, color, 'king.png', x, y, squareSize,location)
+function Queen:validMoves()
+    local moves = {}
+    local directions = {
+        { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 },  -- Horizontal and vertical directions
+        { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } -- Diagonal directions
+    }
+    for i, dir in ipairs(directions) do
+        for v = 1, 8 do
+            local validColumn = self:_letterNumberSwap(self.location.column) + dir[1] * v
+            local validRow = self.location.row + dir[2] * v
+            if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
+                table.insert(moves, { column = self:_letterNumberSwap(validColumn), row = validRow })
+            else
+                break
+            end
+        end
+    end
+    return moves
+end
+
+---------------------------------------------------------------------------------------
+----------------------------------- king --------------------------------------------
+
+function King:new(color, x, y, squareSize, location) -- still need castle function
+    King.super.new(self, color, 'king.png', x, y, squareSize, location)
     self.type = 'king'
 end
+
+function King:validMoves()
+    local moves = {}
+    local directions = {
+        { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 },  -- Horizontal and vertical directions
+        { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } -- Diagonal directions
+    }
+    for i, dir in ipairs(directions) do
+        local validColumn = self:_letterNumberSwap(self.location.column) + dir[1]
+        local validRow = self.location.row + dir[2]
+        if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
+            table.insert(moves, { column = self:_letterNumberSwap(validColumn), row = validRow })
+        end
+    end
+    return moves
+end
+
+---------------------------------------------------------------------------------------
 
 local ChessSet  = {}
 ChessSet.Pawn   = Pawn

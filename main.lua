@@ -54,6 +54,7 @@ function love.mousepressed(mx, my)
             if mx >= peice.left and mx < peice.right and
                 my >= peice.top and my < peice.bottom then
                 peice.moving = true
+                peice.active = true
                 print("Peice Clicked")
             end
         end

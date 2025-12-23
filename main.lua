@@ -12,9 +12,7 @@ local ChessSet = require "obj.ChessSet"
 
 screen = nil
 board = nil
-Lightpiecelist = {}
-Darkpiecelist = {}
-Piecelist = { Lightpiecelist, Darkpiecelist }
+Piecelist = { Piecelist, Piecelist }
 
 capturedLight = {}
 captruedDark = {}
@@ -26,33 +24,26 @@ local squareSize = 65
 function love.load()
     screen = Screen()
     board = ChessBoard(screen.center, squareSize)
-    -- table.insert(darkpeicelist, ChessSet.Pawn('dark', 0,0 , squareSize, {'a',7}))
-    table.insert(Darkpiecelist, ChessSet.Pawn('dark', 0, 0, squareSize, {'d',7}))
-    table.insert(Darkpiecelist, ChessSet.Bishop('dark', 0, 0, squareSize, {'g',8}))
-    table.insert(Lightpiecelist, ChessSet.Pawn('light', 0, 0, squareSize, {'d',2}))
-    table.insert(Lightpiecelist, ChessSet.Knight('light', 0, 0, squareSize,{'b',1}))
-    table.insert(Lightpiecelist, ChessSet.Bishop('light', 0, 0, squareSize,{'c',1}))
-    table.insert(Lightpiecelist, ChessSet.Rook('light', 0, 0, squareSize,{'a',1}))
-    table.insert(Lightpiecelist, ChessSet.Queen('light', 0, 0, squareSize,{'d',1}))
-    table.insert(Lightpiecelist, ChessSet.King('light', 0, 0, squareSize,{'e',1}))
+    table.insert(Piecelist, ChessSet.Rook('light', 0, 0, squareSize,{'h',1}))
+    table.insert(Piecelist, ChessSet.Rook('light', 0, 0, squareSize,{'a',1}))
+    table.insert(Piecelist, ChessSet.King('light', 0, 0, squareSize,{'e',1}))
+    table.insert(Piecelist, ChessSet.Rook('dark', 0, 0, squareSize,{'h',8}))
+    table.insert(Piecelist, ChessSet.Rook('dark', 0, 0, squareSize,{'a',8}))
+    table.insert(Piecelist, ChessSet.King('dark', 0, 0, squareSize,{'e',8}))
     -- makeStartingPieces(ChessSet, squareSize)
     placePieces()
 end
 
 function love.update(dt)
-    for i, list in ipairs(Piecelist) do
-        for v, peice in ipairs(list) do
+    for i, peice in ipairs(Piecelist) do
             peice:update(dt)
-        end
     end
 end
 
 function love.draw()
     board:draw()
-    for i, list in ipairs(Piecelist) do
-        for v, peice in ipairs(list) do
+    for i, peice in ipairs(Piecelist) do
             peice:draw()
-        end
     end
 end
 
@@ -67,6 +58,7 @@ function love.mousereleased(mx, my)
     else
        print(string.format("Still %s's turn", playerTurn))
     end
+    placePieces()
 end
 
 function love.keypressed(key)

@@ -66,6 +66,16 @@ function ChessBoard:draw()
     end
 end
 
+function ChessBoard:getSquare(column,row)
+    for i, list in ipairs(self.squares) do
+        for v, square in ipairs(list) do
+            if column == square.id.column and row == square.id.row then
+                return square
+            end
+        end
+    end
+end
+
 -----------------------------------------------------------
 -- Square
 -----------------------------------------------------------

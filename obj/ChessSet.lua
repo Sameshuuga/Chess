@@ -34,6 +34,7 @@ function ChessPeice:new(color, image, x, y, squareSize, location)
     -- state info
     self.moving = false
     self.active = false
+    self.hasMoved = false
     self.location = { column = location[1], row = location[2] }
 end
 
@@ -52,13 +53,13 @@ function ChessPeice:draw()
     love.graphics.draw(self.image, self.x, self.y, 0, self.scalefactor)
 
     if self.active == true then
-        love.graphics.draw(self.activeImage,self.x,self.y,o,self.scalefactor)
+        love.graphics.draw(self.activeImage, self.x, self.y, o, self.scalefactor)
         for i, move in pairs(self:getValidMoves()) do -- sould probably move this to a local var do avoid repeated calcs
             for i, list in ipairs(board.squares) do
                 for i, square in ipairs(list) do
                     if move.column == square.id.column and
-                    move.row == square.id.row then
-                        love.graphics.circle('line',square.x + square.size /2, square.y + square.size/2, 20)
+                        move.row == square.id.row then
+                        love.graphics.circle('line', square.x + square.size / 2, square.y + square.size / 2, 20)
                     end
                 end
             end
@@ -69,10 +70,9 @@ end
 function ChessPeice:getValidMoves()
     local validMoves = self:validMoves()
 
-   
+
 
     return validMoves
-    
 end
 
 function ChessPeice:_letterNumberSwap(value)
@@ -106,7 +106,7 @@ function Pawn:new(color, x, y, squareSize, location)
     self.type = 'pawn'
 end
 
-function Pawn:validMoves() -- need to add double move option for fist move and limit diagonal to capture only
+function Pawn:validMoves()                              -- need to add double move option for fist move and limit diagonal to capture only
     local moves = {}
     local direction = self.color == 'light' and 1 or -1 -- Light moves up, dark moves down
 
@@ -116,7 +116,7 @@ function Pawn:validMoves() -- need to add double move option for fist move and l
         table.insert(moves, { column = self.location.column, row = validRow })
     end
 
-    -- Diagonal captures 
+    -- Diagonal captures
     for i, offset in ipairs({ -1, 1 }) do
         local validColumn = self:_letterNumberSwap(self.location.column) + offset
         if validColumn >= 1 and validColumn <= 8 then
@@ -249,6 +249,51 @@ function King:validMoves()
     end
     return moves
 end
+
+---------- under construction -----------------------------------------------------------------------
+function King:castle(rook)
+    -- Ensure the king and rook haven't moved
+    if self.hasMoved or rook.hasMoved then
+        return false
+    end
+
+    -- Ensure the rook is in the same row as the king
+    if self.location.row ~= rook.location.row then
+        return false
+    end
+
+    -- Determine the direction of the castle
+    local direction = self:_letterNumberSwap(rook.location.column) > self:_letterNumberSwap(self.location.column)
+        and 1 or -1
+
+    -- Check if the path between the king and rook is clear
+    local column = self:_letterNumberSwap(self.location.column) + direction
+    while column ~= self:_letterNumberSwap(rook.location.column) do
+        local square = board:getSquare(self:_letterNumberSwap(column), self.location.row)
+        if square.isOccupied then
+            return false
+        end
+        column = column + direction
+    end
+
+    -- Move the king two squares toward the rook
+    if direction == 1 then
+        self.location.column = self:_letterNumberSwap(self:_letterNumberSwap(self.location.column) + 2)
+    else
+        self.location.column = self:_letterNumberSwap(self:_letterNumberSwap(self.location.column) - 2)
+    end
+    self.location.row = rook.location.row
+    self.hasMoved = true
+
+    -- Move the rook to the square next to the king
+    rook.location.column = self:_letterNumberSwap(self:_letterNumberSwap(self.location.column) - direction)
+    rook.hasMoved = true
+
+    print('castled')
+    return true
+end
+
+---------- construction end -----------------------------------------------------------------------
 
 ---------------------------------------------------------------------------------------
 

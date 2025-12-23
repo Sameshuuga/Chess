@@ -12,14 +12,16 @@ function ChessPeice:new(color, image, x, y, squareSize, location)
 
     -- set image path based on color
     if color == 'white' or color == 'light' then
-        self.color = 'light_pieces'
+        self.color = 'light'
     elseif color == 'black' or color == 'dark' then
-        self.color = 'dark_pieces'
+        self.color = 'dark'
     else
         error('Invalid color')
     end
     -- set image and scaling factor
-    self.image = love.graphics.newImage(string.format('images/chess_set/%s/%s', self.color, image))
+    self.image = love.graphics.newImage(string.format('images/chess_set/%s_pieces/%s', self.color, image))
+    self.activeImage = love.graphics.newImage(string.format('images/chess_set/%s_pieces/active_%s', self.color, image))
+
     self.scalefactor = squareSize / self.image:getWidth()
 
     -- default attributes
@@ -48,15 +50,29 @@ end
 
 function ChessPeice:draw()
     love.graphics.draw(self.image, self.x, self.y, 0, self.scalefactor)
+
+    if self.active == true then
+        love.graphics.draw(self.activeImage,self.x,self.y,o,self.scalefactor)
+        for i, move in pairs(self:getValidMoves()) do -- sould probably move this to a local var do avoid repeated calcs
+            for i, list in ipairs(board.squares) do
+                for i, square in ipairs(list) do
+                    if move.column == square.id.column and
+                    move.row == square.id.row then
+                        love.graphics.circle('line',square.x + square.size /2, square.y + square.size/2, 20)
+                    end
+                end
+            end
+        end
+    end
 end
 
 function ChessPeice:getValidMoves()
     local validMoves = self:validMoves()
 
-    print('Valid moves: ')
-    for i, move in ipairs(validMoves) do
-        print(move.column, move.row)
-    end
+   
+
+    return validMoves
+    
 end
 
 function ChessPeice:_letterNumberSwap(value)
@@ -92,7 +108,7 @@ end
 
 function Pawn:validMoves() -- need to add double move option for fist move and limit diagonal to capture only
     local moves = {}
-    local direction = self.color == 'light_pieces' and 1 or -1 -- Light moves up, dark moves down
+    local direction = self.color == 'light' and 1 or -1 -- Light moves up, dark moves down
 
     -- Forward move
     local validRow = self.location.row + direction

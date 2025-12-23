@@ -75,6 +75,8 @@ function Square:new(id, x, y, squareSize, color)
     self.image = love.graphics.newImage(string.format('images/chess_set/%s_square.png', self.color))
     self.scalingfactor = squareSize / self.image:getWidth()
 
+    self.occupyingPeice = nil
+
     self.id = id
     self.x = x
     self.y = y

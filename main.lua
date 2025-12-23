@@ -13,20 +13,29 @@ local ChessSet = require "obj.ChessSet"
 screen = nil
 board = nil
 Lightpiecelist = {}
-Darkpeicelist = {}
-Piecelist = { Lightpiecelist, Darkpeicelist }
+Darkpiecelist = {}
+Piecelist = { Lightpiecelist, Darkpiecelist }
 
-local squareSize = 50
+capturedLight = {}
+captruedDark = {}
+
+playerTurn = 'light'
+
+local squareSize = 65
 
 function love.load()
     screen = Screen()
     board = ChessBoard(screen.center, squareSize)
     -- table.insert(darkpeicelist, ChessSet.Pawn('dark', 0,0 , squareSize, {'a',7}))
-    -- table.insert(darkpeicelist, ChessSet.Queen('dark', 0, 0, squareSize, {'d',8}))
-    -- table.insert(lightpiecelist, ChessSet.Pawn('light', 0, 0, squareSize, {'a',2}))
-    -- table.insert(lightpiecelist, ChessSet.Knight('light', 0, 0, squareSize,{'b',1}))
-    -- table.insert(lightpiecelist, ChessSet.Bishop('light', 0, 0, squareSize,{'e',4}))
-    makeStartingPieces(ChessSet, squareSize)
+    table.insert(Darkpiecelist, ChessSet.Pawn('dark', 0, 0, squareSize, {'d',7}))
+    table.insert(Darkpiecelist, ChessSet.Bishop('dark', 0, 0, squareSize, {'g',8}))
+    table.insert(Lightpiecelist, ChessSet.Pawn('light', 0, 0, squareSize, {'d',2}))
+    table.insert(Lightpiecelist, ChessSet.Knight('light', 0, 0, squareSize,{'b',1}))
+    table.insert(Lightpiecelist, ChessSet.Bishop('light', 0, 0, squareSize,{'c',1}))
+    table.insert(Lightpiecelist, ChessSet.Rook('light', 0, 0, squareSize,{'a',1}))
+    table.insert(Lightpiecelist, ChessSet.Queen('light', 0, 0, squareSize,{'d',1}))
+    table.insert(Lightpiecelist, ChessSet.King('light', 0, 0, squareSize,{'e',1}))
+    -- makeStartingPieces(ChessSet, squareSize)
     placePieces()
 end
 
@@ -48,21 +57,16 @@ function love.draw()
 end
 
 function love.mousepressed(mx, my)
-    for i, list in ipairs(Piecelist) do
-        -- detect when a peice is clicked
-        for v, peice in ipairs(list) do
-            if mx >= peice.left and mx < peice.right and
-                my >= peice.top and my < peice.bottom then
-                peice.moving = true
-                peice.active = true
-                print("Peice Clicked")
-            end
-        end
-    end
+    pickUpPiece(mx,my)
 end
 
 function love.mousereleased(mx, my)
-    snapPiece(mx, my)
+    if snapPiece(mx, my) then
+        playerTurn = (playerTurn == 'dark') and 'light' or 'dark'
+        print(string.format("it's %s's turn", playerTurn))
+    else
+       print(string.format("Still %s's turn", playerTurn))
+    end
 end
 
 function love.keypressed(key)

@@ -21,7 +21,6 @@ function ChessPeice:new(color, image, x, y, squareSize, location)
     -- set image and scaling factor
     self.image = love.graphics.newImage(string.format('images/chess_set/%s_pieces/%s', self.color, image))
     self.activeImage = love.graphics.newImage(string.format('images/chess_set/%s_pieces/active_%s', self.color, image))
-
     self.scalefactor = squareSize / self.image:getWidth()
 
     -- default attributes
@@ -36,6 +35,7 @@ function ChessPeice:new(color, image, x, y, squareSize, location)
     self.active = false
     self.hasMoved = false
     self.location = { column = location[1], row = location[2] }
+    self.target= self.location
 end
 
 function ChessPeice:update(dt)
@@ -53,14 +53,12 @@ function ChessPeice:draw()
     love.graphics.draw(self.image, self.x, self.y, 0, self.scalefactor)
 
     if self.active == true then
-        love.graphics.draw(self.activeImage, self.x, self.y, o, self.scalefactor)
-        for i, move in pairs(self:getValidMoves()) do -- sould probably move this to a local var do avoid repeated calcs
-            for i, list in ipairs(board.squares) do
-                for i, square in ipairs(list) do
-                    if move.column == square.id.column and
-                        move.row == square.id.row then
-                        love.graphics.circle('line', square.x + square.size / 2, square.y + square.size / 2, 20)
-                    end
+        love.graphics.draw(self.activeImage, self.x, self.y, 0, self.scalefactor)
+        for i, move in pairs(self:validMoves()) do
+            for i, square in ipairs(board.squarelist) do
+                if move.column == square.id.column and
+                    move.row == square.id.row then
+                    love.graphics.circle('line', square.x + square.size / 2, square.y + square.size / 2, 20)
                 end
             end
         end
@@ -69,13 +67,10 @@ end
 
 function ChessPeice:getValidMoves()
     local validMoves = self:validMoves()
-
-
-
     return validMoves
 end
 
-function ChessPeice:_letterNumberSwap(value)
+function ChessPeice:_convertColumn(value)
     local converter = {
         a = 1,
         b = 2,
@@ -111,6 +106,7 @@ function Pawn:validMoves()                              -- need to add double mo
     local direction = self.color == 'light' and 1 or -1 -- Light moves up, dark moves down
 
     -- Forward move
+
     local validRow = self.location.row + direction
     if validRow >= 1 and validRow <= 8 then
         table.insert(moves, { column = self.location.column, row = validRow })
@@ -118,9 +114,9 @@ function Pawn:validMoves()                              -- need to add double mo
 
     -- Diagonal captures
     for i, offset in ipairs({ -1, 1 }) do
-        local validColumn = self:_letterNumberSwap(self.location.column) + offset
+        local validColumn = self:_convertColumn(self.location.column) + offset
         if validColumn >= 1 and validColumn <= 8 then
-            table.insert(moves, { column = self:_letterNumberSwap(validColumn), row = validRow })
+            table.insert(moves, { column = self:_convertColumn(validColumn), row = validRow })
         end
     end
 
@@ -141,10 +137,10 @@ function Knight:validMoves()
         { 1, 2 }, { 1, -2 }, { -1, 2 }, { -1, -2 }
     }
     for i, offset in ipairs(offsets) do
-        local validColumn = self:_letterNumberSwap(self.location.column) + offset[1]
+        local validColumn = self:_convertColumn(self.location.column) + offset[1]
         local validRow = self.location.row + offset[2]
         if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
-            table.insert(moves, { column = self:_letterNumberSwap(validColumn), row = validRow })
+            table.insert(moves, { column = self:_convertColumn(validColumn), row = validRow })
         end
     end
     return moves
@@ -162,10 +158,10 @@ function Bishop:validMoves()
     local directions = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } } -- Diagonal directions
     for i, dir in ipairs(directions) do
         for v = 1, 8 do
-            local validColumn = self:_letterNumberSwap(self.location.column) + dir[1] * v
+            local validColumn = self:_convertColumn(self.location.column) + dir[1] * v
             local validRow = self.location.row + dir[2] * v
             if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
-                table.insert(moves, { column = self:_letterNumberSwap(validColumn), row = validRow })
+                table.insert(moves, { column = self:_convertColumn(validColumn), row = validRow })
             else
                 break
             end
@@ -186,10 +182,10 @@ function Rook:validMoves()
     local directions = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } } -- Horizontal and vertical directions
     for i, dir in ipairs(directions) do
         for v = 1, 8 do
-            local validColumn = self:_letterNumberSwap(self.location.column) + dir[1] * v
+            local validColumn = self:_convertColumn(self.location.column) + dir[1] * v
             local validRow = self.location.row + dir[2] * v
             if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
-                table.insert(moves, { column = self:_letterNumberSwap(validColumn), row = validRow })
+                table.insert(moves, { column = self:_convertColumn(validColumn), row = validRow })
             else
                 break
             end
@@ -214,10 +210,10 @@ function Queen:validMoves()
     }
     for i, dir in ipairs(directions) do
         for v = 1, 8 do
-            local validColumn = self:_letterNumberSwap(self.location.column) + dir[1] * v
+            local validColumn = self:_convertColumn(self.location.column) + dir[1] * v
             local validRow = self.location.row + dir[2] * v
             if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
-                table.insert(moves, { column = self:_letterNumberSwap(validColumn), row = validRow })
+                table.insert(moves, { column = self:_convertColumn(validColumn), row = validRow })
             else
                 break
             end
@@ -241,10 +237,10 @@ function King:validMoves()
         { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } -- Diagonal directions
     }
     for i, dir in ipairs(directions) do
-        local validColumn = self:_letterNumberSwap(self.location.column) + dir[1]
+        local validColumn = self:_convertColumn(self.location.column) + dir[1]
         local validRow = self.location.row + dir[2]
         if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
-            table.insert(moves, { column = self:_letterNumberSwap(validColumn), row = validRow })
+            table.insert(moves, { column = self:_convertColumn(validColumn), row = validRow })
         end
     end
     return moves
@@ -263,13 +259,13 @@ function King:castle(rook)
     end
 
     -- Determine the direction of the castle
-    local direction = self:_letterNumberSwap(rook.location.column) > self:_letterNumberSwap(self.location.column)
+    local direction = self:_convertColumn(rook.location.column) > self:_convertColumn(self.location.column)
         and 1 or -1
 
     -- Check if the path between the king and rook is clear
-    local column = self:_letterNumberSwap(self.location.column) + direction
-    while column ~= self:_letterNumberSwap(rook.location.column) do
-        local square = board:getSquare(self:_letterNumberSwap(column), self.location.row)
+    local column = self:_convertColumn(self.location.column) + direction
+    while column ~= self:_convertColumn(rook.location.column) do
+        local square = board:getSquare(self:_convertColumn(column), self.location.row)
         if square.isOccupied then
             return false
         end
@@ -278,15 +274,15 @@ function King:castle(rook)
 
     -- Move the king two squares toward the rook
     if direction == 1 then
-        self.location.column = self:_letterNumberSwap(self:_letterNumberSwap(self.location.column) + 2)
+        self.location.column = self:_convertColumn(self:_convertColumn(self.location.column) + 2)
     else
-        self.location.column = self:_letterNumberSwap(self:_letterNumberSwap(self.location.column) - 2)
+        self.location.column = self:_convertColumn(self:_convertColumn(self.location.column) - 2)
     end
     self.location.row = rook.location.row
     self.hasMoved = true
 
     -- Move the rook to the square next to the king
-    rook.location.column = self:_letterNumberSwap(self:_letterNumberSwap(self.location.column) - direction)
+    rook.location.column = self:_convertColumn(self:_convertColumn(self.location.column) - direction)
     rook.hasMoved = true
 
     print('castled')

@@ -5,7 +5,7 @@ function Screen:new()
     --[=[ Screen object for control of screen ]=]
 
     -- Screen set up --
-    self.title = love.window.setTitle("RocketMan")
+    self.title = love.window.setTitle("Chess")
     -- love.window.maximize()
 
     -- Screen dimensions --

@@ -54,38 +54,28 @@ function makeStartingPieces(ChessSet, squareSize)
     end
 end
 
-function placePieces()
+function setupBoard()
     --[=[ interate through all pieces and squares and match piece
-        location and square id. piece x,y = square x,y ]=]
+        location and square id. piece x,y = square x,y.
+        square occupyingPeice = piece. ]=]
 
-
-    for i, row in ipairs(board.squares) do
-        for v, square in ipairs(row) do
-            square.occupyingPeice = 'none'
-        end
+    for i, square in ipairs(board.squarelist) do
+        square.occupyingPeice = 'none'
     end
-    
-    for i, peice in ipairs(Piecelist) do
-        -- place peices on the assigned square
-        for i, squarelist in ipairs(board.squares) do
-            -- find correct square id
-            for v, square in ipairs(squarelist) do
-                if peice.location.column == square.id.column and
-                    peice.location.row == square.id.row then
-                    peice.x = square.x; peice.y = square.y
 
-
-                    square.occupyingPeice = peice
-
-
-                    print(square.id.column, square.id.row, square.occupyingPeice.type)
-                end
+    for p, peice in ipairs(Piecelist) do -- place peices
+        for i, square in ipairs(board.squarelist) do
+            if peice.location.column == square.id.column and
+                peice.location.row == square.id.row then
+                peice.x = square.x; peice.y = square.y
+                peice.location = square.id --syncs table reference
+                square.occupyingPeice = peice
             end
         end
     end
 end
 
-function pickUpPiece(mx, my)
+function pickupPiece(mx, my)
     --[=[ handles picking up pieces and checking if the pieces is valid based on
    player turn ]=]
 
@@ -103,88 +93,59 @@ function pickUpPiece(mx, my)
     end
 end
 
-function snapPiece(mx, my)
-    --[=[ detects closest square and snaps peice to it's location.
-        i.e it sets the peices x,y = to the squares x,y. It also
-        sets the peice column, row location the the square id. ]=]
-    local value
-    for i, piece in ipairs(Piecelist) do
-        -- detect when a peice is dropped
-        if mx >= piece.left and mx < piece.right and
-            my >= piece.top and my < piece.bottom and
-            piece.active then
+function dropPiece()
+    --[=[  ]=]
+    for p, piece in ipairs(Piecelist) do --find active peice
+        if piece.active then
             piece.moving = false
-            for i, squarelist in ipairs(board.squares) do
-                -- snap to nearest square and set approprate active status
-                for v, square in ipairs(squarelist) do
-                    if square.center.x >= piece.left and square.center.x < piece.right and
-                        square.center.y >= piece.top and square.center.y < piece.bottom then
-                        piece.x = square.x; piece.y = square.y
-
-                        if piece.location.column == square.id.column and
-                            piece.location.row == square.id.row then
-                            break
-                        else
-                            -------------------------------------- capture logic ---------------------------------------------------
-                            print('list before cap:')
-                            for i, piece in ipairs(Piecelist) do
-                                print(piece.type, piece.color, i)
-                            end
-
-                            if square.occupyingPeice.color ~= piece.color then -- capture logic starts here
-                                if square.occupyingPeice.color == 'light' then
-                                    table.insert(capturedLight, square.occupyingPeice)
-                                else
-                                    table.insert(captruedDark, square.occupyingPeice)
-                                end
-
-                                for i = #Piecelist, 1, -1 do
-                                    if Piecelist[i] == square.occupyingPeice then
-                                        table.remove(Piecelist, i)
-                                        break
-                                    end
-                                end
-                            end -- capture logic ends here
-
-                            print('list after cap: ')
-                            for i, peice in ipairs(Piecelist) do
-                                print(peice.type, peice.color, i)
-                            end
-                            -----------------------------------------------------------------------------------------
-
-                            if piece.type == 'king' and
-                                square.occupyingPeice.type == "rook" and
-                                square.occupyingPeice.color == piece.color then
-                                piece:castle(square.occupyingPeice)
-                            else
-                                piece.location = square.id
-                            end
-
-                            piece.active = false
-                            piece.hasMoved = true
-                            value = true
-                        end
-                    end
+            for i, square in ipairs(board.squarelist) do --find&link target square and then break
+                if square.center.x >= piece.left and square.center.x < piece.right and
+                    square.center.y >= piece.top and square.center.y < piece.bottom then
+                    piece.target = square.id
+                    break
                 end
             end
-
-            print('dark cap: ')
-            for i, peice in ipairs(captruedDark) do
-                print(peice.type, peice.color)
+            ----------------- under construction ----------------------
+            if isMoveValid(piece) then --run move logic
+                placePiece(piece)    
             end
-            print('light cap: ')
-            for i, peice in ipairs(capturedLight) do
-                print(peice.type, peice.color)
-            end
+            placePiece(piece)
 
-            -- print('current location: ', peice.location.column, peice.location.row)
-            -- print('Active = ', peice.active)
-            print("Peice Released")
+            ----------------- under construction ----------------------
+
+            break
         end
     end
-    return value
 end
 
-function capturePeice()
 
+function placePiece(piece)
+    --[=[ check if target is valid and up date peice location accordingly ]=]
+
+    ------------------ under construction (tempary code) -----------------------
+    local currentSquare = board:getSquare(piece.location)
+    local targetSquare = board:getSquare(piece.target)
+
+    if isMoveValid(piece) then
+        currentSquare = "none"
+        targetSquare.occupyingPeice = piece
+        piece.location = piece.target
+        piece.x, piece.y = targetSquare.topLeft[1], targetSquare.topLeft[2]
+        playerTurn = (playerTurn == 'dark') and 'light' or 'dark'
+    else
+        piece.target = piece.location
+        piece.x, piece.y = currentSquare.topLeft[1], currentSquare.topLeft[2]
+    end
+    ------------------ under construction (tempary code) -----------------------
+    
+end
+
+function isMoveValid(piece)
+    --[=[ check validity of target move by comparing to piece:validMoves() ]=]
+    for i, move in ipairs(piece:validMoves()) do
+        if piece.target.column == move.column and piece.target.row == move.row then
+            return true
+        end
+    end
+    return false
 end

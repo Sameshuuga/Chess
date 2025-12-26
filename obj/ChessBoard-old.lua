@@ -32,12 +32,13 @@ function ChessBoard:new(center, squareSize, w, h)
         self.columns[i + 1] = string.char(string.byte("a") + i)
     end
 
-    -- Build list of Square objects
-    self.squarelist = {}
+    -- Build grid of Square objects
+    self.squares = {}
     local y = self.topLeft.y
     local color = 'dark'
 
     for r, row in ipairs(self.rows) do
+        local squarelist = {}
         local x = self.topLeft.x
 
         for c, column in ipairs(self.columns) do
@@ -45,30 +46,34 @@ function ChessBoard:new(center, squareSize, w, h)
             color = (color == 'dark') and 'light' or 'dark'
             local id = { column = column, row = row }
             -- print(id.row,id.column)
-            table.insert(self.squarelist, Square(id, x, y, self.squareSize, color))
+            table.insert(squarelist, Square(id, x, y, self.squareSize, color))
             x = x + squareSize
         end
 
         -- Toggle again each row to ensure checkerboard pattern stays aligned
         color = (color == 'dark') and 'light' or 'dark'
-        y = y + squareSize --next row
+
+        table.insert(self.squares, squarelist)
+        y = y + squareSize
     end
 end
 
 function ChessBoard:draw()
-    for i, square in ipairs(self.squarelist) do
-        square:draw(self.board_colors, self.scalefactor)
+    for r, row in ipairs(self.squares) do
+        for i, square in ipairs(row) do
+            square:draw(self.board_colors, self.scalefactor)
+        end
     end
 end
 
-function ChessBoard:getSquare(id)
-    for i, square in ipairs(self.squarelist) do
-        if id[1] == square.id.column and id[2] == square.id.row or
-            id.column == square.id.column and id.row == square.id.row then
-            return square
+function ChessBoard:getSquare(column,row)
+    for i, list in ipairs(self.squares) do
+        for v, square in ipairs(list) do
+            if column == square.id.column and row == square.id.row then
+                return square
+            end
         end
     end
-    error('Square not found')
 end
 
 -----------------------------------------------------------
@@ -87,8 +92,7 @@ function Square:new(id, x, y, squareSize, color)
     self.y = y
     self.size = squareSize
 
-    -- Boundaries for interactions
-    self.topLeft = { self.x, self.y }
+    -- Boundaries for potential interactions
     self.center = { x = self.x + self.size / 2, y = self.y + self.size / 2 }
     self.top = y
     self.bottom = y + squareSize

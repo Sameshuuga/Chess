@@ -70,7 +70,8 @@ function ChessPeice:getValidMoves()
     return validMoves
 end
 
-function ChessPeice:_convertColumn(value)
+function ChessPeice:_cc(value)
+    --[=[ Convert Column ]=]
     local converter = {
         a = 1,
         b = 2,
@@ -114,9 +115,9 @@ function Pawn:validMoves()                              -- need to add double mo
 
     -- Diagonal captures
     for i, offset in ipairs({ -1, 1 }) do
-        local validColumn = self:_convertColumn(self.location.column) + offset
+        local validColumn = self:_cc(self.location.column) + offset
         if validColumn >= 1 and validColumn <= 8 then
-            table.insert(moves, { column = self:_convertColumn(validColumn), row = validRow })
+            table.insert(moves, { column = self:_cc(validColumn), row = validRow })
         end
     end
 
@@ -137,10 +138,10 @@ function Knight:validMoves()
         { 1, 2 }, { 1, -2 }, { -1, 2 }, { -1, -2 }
     }
     for i, offset in ipairs(offsets) do
-        local validColumn = self:_convertColumn(self.location.column) + offset[1]
+        local validColumn = self:_cc(self.location.column) + offset[1]
         local validRow = self.location.row + offset[2]
         if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
-            table.insert(moves, { column = self:_convertColumn(validColumn), row = validRow })
+            table.insert(moves, { column = self:_cc(validColumn), row = validRow })
         end
     end
     return moves
@@ -158,10 +159,10 @@ function Bishop:validMoves()
     local directions = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } } -- Diagonal directions
     for i, dir in ipairs(directions) do
         for v = 1, 8 do
-            local validColumn = self:_convertColumn(self.location.column) + dir[1] * v
+            local validColumn = self:_cc(self.location.column) + dir[1] * v
             local validRow = self.location.row + dir[2] * v
             if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
-                table.insert(moves, { column = self:_convertColumn(validColumn), row = validRow })
+                table.insert(moves, { column = self:_cc(validColumn), row = validRow })
             else
                 break
             end
@@ -182,10 +183,10 @@ function Rook:validMoves()
     local directions = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } } -- Horizontal and vertical directions
     for i, dir in ipairs(directions) do
         for v = 1, 8 do
-            local validColumn = self:_convertColumn(self.location.column) + dir[1] * v
+            local validColumn = self:_cc(self.location.column) + dir[1] * v
             local validRow = self.location.row + dir[2] * v
             if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
-                table.insert(moves, { column = self:_convertColumn(validColumn), row = validRow })
+                table.insert(moves, { column = self:_cc(validColumn), row = validRow })
             else
                 break
             end
@@ -210,10 +211,10 @@ function Queen:validMoves()
     }
     for i, dir in ipairs(directions) do
         for v = 1, 8 do
-            local validColumn = self:_convertColumn(self.location.column) + dir[1] * v
+            local validColumn = self:_cc(self.location.column) + dir[1] * v
             local validRow = self.location.row + dir[2] * v
             if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
-                table.insert(moves, { column = self:_convertColumn(validColumn), row = validRow })
+                table.insert(moves, { column = self:_cc(validColumn), row = validRow })
             else
                 break
             end
@@ -237,10 +238,10 @@ function King:validMoves()
         { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } -- Diagonal directions
     }
     for i, dir in ipairs(directions) do
-        local validColumn = self:_convertColumn(self.location.column) + dir[1]
+        local validColumn = self:_cc(self.location.column) + dir[1]
         local validRow = self.location.row + dir[2]
         if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
-            table.insert(moves, { column = self:_convertColumn(validColumn), row = validRow })
+            table.insert(moves, { column = self:_cc(validColumn), row = validRow })
         end
     end
     return moves
@@ -259,13 +260,13 @@ function King:castle(rook)
     end
 
     -- Determine the direction of the castle
-    local direction = self:_convertColumn(rook.location.column) > self:_convertColumn(self.location.column)
+    local direction = self:_cc(rook.location.column) > self:_cc(self.location.column)
         and 1 or -1
 
     -- Check if the path between the king and rook is clear
-    local column = self:_convertColumn(self.location.column) + direction
-    while column ~= self:_convertColumn(rook.location.column) do
-        local square = board:getSquare(self:_convertColumn(column), self.location.row)
+    local column = self:_cc(self.location.column) + direction
+    while column ~= self:_cc(rook.location.column) do
+        local square = board:getSquare(self:_cc(column), self.location.row)
         if square.isOccupied then
             return false
         end
@@ -274,15 +275,15 @@ function King:castle(rook)
 
     -- Move the king two squares toward the rook
     if direction == 1 then
-        self.location.column = self:_convertColumn(self:_convertColumn(self.location.column) + 2)
+        self.location.column = self:_cc(self:_cc(self.location.column) + 2)
     else
-        self.location.column = self:_convertColumn(self:_convertColumn(self.location.column) - 2)
+        self.location.column = self:_cc(self:_cc(self.location.column) - 2)
     end
     self.location.row = rook.location.row
     self.hasMoved = true
 
     -- Move the rook to the square next to the king
-    rook.location.column = self:_convertColumn(self:_convertColumn(self.location.column) - direction)
+    rook.location.column = self:_cc(self:_cc(self.location.column) - direction)
     rook.hasMoved = true
 
     print('castled')

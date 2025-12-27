@@ -1,0 +1,9 @@
+This is a game of chess written in lua using the Love2d framework.
+
+Development Notes:
+* peice.location and peice.target are the main points of manipulation
+    drag and drop works by detecting the closest square and setting it
+    as the target. The move is then validated and executed.
+    
+    peice.target will be able to be manipulated by text input eventually. 
+    this will drive the game loop in the same way that drag and drop does

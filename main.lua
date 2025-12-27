@@ -9,9 +9,14 @@ Tick = require "lib/tick"
 local Screen = require "obj.screen"
 local ChessBoard = require "obj.ChessBoard"
 local ChessSet = require "obj.ChessSet"
+local Timer = require "obj.Timer"
+local Ui = require "obj.ui"
 
 screen = nil
 board = nil
+local timer = nil
+
+
 Piecelist = {}
 capturedLight = {}
 captruedDark = {}
@@ -19,20 +24,15 @@ captruedDark = {}
 playerTurn = 'light'
 
 local squareSize = 65
-
+local timeLimit = 500 --in seconds
 
 function love.load()
     screen = Screen()
     board = ChessBoard(screen.center, squareSize)
-    table.insert(Piecelist, ChessSet.Rook('light', 0, 0, squareSize, { 'h', 1 }))
-    table.insert(Piecelist, ChessSet.Rook('light', 0, 0, squareSize, { 'a', 1 }))
-    table.insert(Piecelist, ChessSet.King('light', 0, 0, squareSize, { 'e', 1 }))
-    table.insert(Piecelist, ChessSet.Rook('dark', 0, 0, squareSize, { 'h', 8 }))
-    table.insert(Piecelist, ChessSet.Rook('dark', 0, 0, squareSize, { 'a', 8 }))
-    table.insert(Piecelist, ChessSet.King('dark', 0, 0, squareSize, { 'e', 8 }))
-    table.insert(Piecelist, ChessSet.Bishop('dark', 0, 0, squareSize, { 'c', 8 }))
-    table.insert(Piecelist, ChessSet.Bishop('light', 0, 0, squareSize, { 'c', 1 }))
-    -- makeStartingPieces(ChessSet, squareSize)
+    ui = Ui()
+    timer1 = Timer(timeLimit, ui.timer1[1], ui.timer1[2])
+    timer2 = Timer(timeLimit, ui.timer2[1], ui.timer2[2])
+    makeStartingPieces(ChessSet, squareSize)
     setupBoard()
 end
 
@@ -40,6 +40,8 @@ function love.update(dt)
     for i, peice in ipairs(Piecelist) do
         peice:update(dt)
     end
+    timer1:update(dt)
+    timer2:update(dt)
 end
 
 function love.draw()
@@ -47,14 +49,19 @@ function love.draw()
     for i, peice in ipairs(Piecelist) do
         peice:draw()
     end
+    timer1:draw()
+    timer2:draw()
+
+
+    screen:draw()
 end
 
 function love.mousepressed(mx, my)
-    pickupPiece(mx, my)
+    drag(mx, my)
 end
 
 function love.mousereleased(mx, my)
-    dropPiece()
+    drop()
 end
 
 function love.keypressed(key)

@@ -15,8 +15,10 @@ function ChessBoard:new(center, squareSize, w, h)
     self.height     = h or 8
     self.squareSize = squareSize
 
-    -- Top-left corner
+    -- Boundries
     self.center     = center
+    self.top        = center.y - squareSize * 4
+    self.bottom     = center.y + squareSize * 4
     self.topLeft    = {
         x = self.center.x - (self.width * self.squareSize) / 2,
         y = self.center.y - (self.height * self.squareSize) / 2

@@ -21,7 +21,6 @@ function Screen:new()
     self.center = { x = self.width / 2, y = self.height / 2 }
     self.topRight = { x = self.width, y = 0 }
 
-    return self
 end
 
 ------------------------------------------------------------------------------------
@@ -29,10 +28,6 @@ end
 ------------------------------------------------------------------------------------
 function Screen:draw()
     --[=[ method to draw tests to the screen object ]=]
-    love.graphics.circle("line", self.topCenter.x, self.topCenter.y, 4)
-    love.graphics.circle("line", self.leftCenter.x, self.leftCenter.y, 4)
-    love.graphics.circle("line", self.rightCenter.x, self.rightCenter.y, 4)
-    love.graphics.circle("line", self.center.x, self.center.y, 4)
 end
 
 ------------------------------------------------------------------------------------

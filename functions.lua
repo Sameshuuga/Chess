@@ -75,7 +75,7 @@ function setupBoard()
     end
 end
 
-function pickupPiece(mx, my)
+function drag(mx, my)
     --[=[ handles picking up pieces and checking if the pieces is valid based on
    player turn ]=]
 
@@ -93,7 +93,7 @@ function pickupPiece(mx, my)
     end
 end
 
-function dropPiece()
+function drop()
     --[=[  ]=]
     for p, piece in ipairs(Piecelist) do --find active peice
         if piece.active then
@@ -112,7 +112,6 @@ function dropPiece()
             placePiece(piece)
 
             ----------------- under construction ----------------------
-
             break
         end
     end
@@ -131,6 +130,7 @@ function placePiece(piece)
         targetSquare.occupyingPeice = piece
         piece.location = piece.target
         piece.x, piece.y = targetSquare.topLeft[1], targetSquare.topLeft[2]
+        piece.active = false; piece.hasMoved = true
         playerTurn = (playerTurn == 'dark') and 'light' or 'dark'
     else
         piece.target = piece.location

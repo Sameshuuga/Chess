@@ -104,11 +104,15 @@ end
 
 function Pawn:validMoves()                              -- need to add double move option for fist move and limit diagonal to capture only
     local moves = {}
-    local direction = self.color == 'light' and 1 or -1 -- Light moves up, dark moves down
-
+    local move = self.color == 'light' and 1 or -1 -- Light moves up, dark moves down
+    local firstmove = self.color == 'light' and 2 or -2
+    
     -- Forward move
+    if self.hasMoved == false then
+        table.insert(moves,{column = self.location.column, row=self.location.row + firstmove})
+    end
 
-    local validRow = self.location.row + direction
+    local validRow = self.location.row + move
     if validRow >= 1 and validRow <= 8 then
         table.insert(moves, { column = self.location.column, row = validRow })
     end

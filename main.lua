@@ -14,24 +14,31 @@ local Ui = require "obj.ui"
 
 screen = nil
 board = nil
+ui = nil
 local timer = nil
 
 
 Piecelist = {}
-capturedLight = {}
-captruedDark = {}
+Caplist = {}
 
+
+gamestart = false
 playerTurn = 'light'
 
 local squareSize = 65
 local timeLimit = 500 --in seconds
 
+--- test zone ---
+--- test zone ---
+--- 
 function love.load()
     screen = Screen()
     board = ChessBoard(screen.center, squareSize)
-    ui = Ui()
+
+    ui = Ui(caplist, squareSize)
     timer1 = Timer(timeLimit, ui.timer1[1], ui.timer1[2])
     timer2 = Timer(timeLimit, ui.timer2[1], ui.timer2[2])
+
     makeStartingPieces(ChessSet, squareSize)
     setupBoard()
 end
@@ -40,8 +47,14 @@ function love.update(dt)
     for i, peice in ipairs(Piecelist) do
         peice:update(dt)
     end
-    timer1:update(dt)
-    timer2:update(dt)
+
+    if gamestart then
+        if playerTurn == 'dark' then
+            timer1:update(dt)
+        elseif playerTurn == 'light' then
+            timer2:update(dt)
+        end
+    end
 end
 
 function love.draw()
@@ -49,10 +62,10 @@ function love.draw()
     for i, peice in ipairs(Piecelist) do
         peice:draw()
     end
-    timer1:draw()
-    timer2:draw()
 
-
+    timer1:draw(); timer2:draw()
+    
+    ui:draw()
     screen:draw()
 end
 

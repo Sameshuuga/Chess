@@ -106,17 +106,12 @@ function drop()
                 end
             end
             ----------------- under construction ----------------------
-            if isMoveValid(piece) then --run move logic
-                placePiece(piece)    
-            end
-            placePiece(piece)
-
+            placePiece(piece) --run move logic
             ----------------- under construction ----------------------
             break
         end
     end
 end
-
 
 function placePiece(piece)
     --[=[ check if target is valid and up date peice location accordingly ]=]
@@ -126,18 +121,22 @@ function placePiece(piece)
     local targetSquare = board:getSquare(piece.target)
 
     if isMoveValid(piece) then
-        currentSquare = "none"
+        currentSquare.occupyingPeice = 'none'
+        if targetSquare.occupyingPeice ~= 'none' then
+            capturePeice(targetSquare.occupyingPeice)
+        end
         targetSquare.occupyingPeice = piece
         piece.location = piece.target
         piece.x, piece.y = targetSquare.topLeft[1], targetSquare.topLeft[2]
         piece.active = false; piece.hasMoved = true
+
+        gamestart = true
         playerTurn = (playerTurn == 'dark') and 'light' or 'dark'
     else
         piece.target = piece.location
         piece.x, piece.y = currentSquare.topLeft[1], currentSquare.topLeft[2]
     end
     ------------------ under construction (tempary code) -----------------------
-    
 end
 
 function isMoveValid(piece)
@@ -148,4 +147,25 @@ function isMoveValid(piece)
         end
     end
     return false
+end
+
+function capturePeice(piece)
+    --[=[ take a Peice add it to cap list and remove it from Peicelist ]=]
+    table.insert(Caplist, piece)
+    for i = #Piecelist, 1, -1 do
+        if Piecelist[i] == piece then
+            table.remove(Piecelist, i)
+            break
+        end
+    end
+    ui:buildCapDisplay()
+
+    print('Caplist: ')
+    for i, n in ipairs(Caplist) do
+        print(n.type, n.color)
+    end
+    -- print('Piecelist: ')
+    -- for i, n in ipairs(Piecelist) do
+    --     print(n.type)
+    -- end
 end

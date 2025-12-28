@@ -19,6 +19,8 @@ function ChessBoard:new(center, squareSize, w, h)
     self.center     = center
     self.top        = center.y - squareSize * 4
     self.bottom     = center.y + squareSize * 4
+    self.left       = center.x - squareSize * 4
+    self.right      = center.x + squareSize * 4
     self.topLeft    = {
         x = self.center.x - (self.width * self.squareSize) / 2,
         y = self.center.y - (self.height * self.squareSize) / 2

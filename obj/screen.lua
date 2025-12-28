@@ -19,8 +19,8 @@ function Screen:new()
     self.leftCenter = { x = 0, y = self.height / 2 }
     self.rightCenter = { x = self.width, y = self.height / 2 }
     self.center = { x = self.width / 2, y = self.height / 2 }
+    self.topLeft = { x = 0, y = 0 }
     self.topRight = { x = self.width, y = 0 }
-
 end
 
 ------------------------------------------------------------------------------------

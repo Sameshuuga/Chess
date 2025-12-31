@@ -1,4 +1,12 @@
 -- shared functions to hide clutter
+function shallowcopy(orig)
+    local copy = {}
+    for k, v in pairs(orig) do
+        copy[k] = v
+    end
+    return copy
+end
+
 
 function check_collision(a, b)
     return a.right > b.left
@@ -23,15 +31,15 @@ function makeStartingPieces(ChessSet, squareSize)
             dark = { { 'a', 8 }, { 'h', 8 } },
         },
         Knight = {
-            light = { { 'b', 1 }, { 'g', 1 } },
+--            light = { { 'b', 1 }, { 'g', 1 } },
             dark = { { 'b', 8 }, { 'g', 8 } },
         },
         Bishop = {
-            light = { { 'c', 1 }, { 'f', 1 } },
+--            light = { { 'c', 1 },{ 'f', 1 } },
             dark = { { 'c', 8 }, { 'f', 8 } },
         },
         Queen = {
-            light = { { 'd', 1 } },
+  --          light = { { 'd', 1 } },
             dark = { { 'd', 8 } },
         },
         King = {
@@ -101,7 +109,7 @@ function drop()
             for i, square in ipairs(board.squarelist) do --find&link target square and then break
                 if square.center.x >= piece.left and square.center.x < piece.right and
                     square.center.y >= piece.top and square.center.y < piece.bottom then
-                    piece.target = square.id
+                    piece.target = shallowcopy(square.id)
                     break
                 end
             end
@@ -119,19 +127,25 @@ function placePiece(piece)
     ------------------ under construction (tempary code) -----------------------
     local currentSquare = board:getSquare(piece.location)
     local targetSquare = board:getSquare(piece.target)
-
-    if isMoveValid(piece) then
+    local move = isMoveValid(piece)
+    if move then
         currentSquare.occupyingPeice = 'none'
+        if move.type == 'castle' then
+            piece:doCastle(move)
+            targetSquare = board:getSquare(piece.target)
+        end
+        -- print(targetSquare.id.column,targetSquare.id.row)
         if targetSquare.occupyingPeice ~= 'none' then
             capturePeice(targetSquare.occupyingPeice)
         end
+        
         targetSquare.occupyingPeice = piece
-        piece.location = piece.target
+        piece.location = shallowcopy(piece.target)
         piece.x, piece.y = targetSquare.topLeft[1], targetSquare.topLeft[2]
         piece.active = false; piece.hasMoved = true
 
         gamestart = true
-        playerTurn = (playerTurn == 'dark') and 'light' or 'dark'
+        playerTurn = (piece.color == 'dark') and 'light' or 'dark'
     else
         piece.target = piece.location
         piece.x, piece.y = currentSquare.topLeft[1], currentSquare.topLeft[2]
@@ -143,7 +157,7 @@ function isMoveValid(piece)
     --[=[ check validity of target move by comparing to piece:validMoves() ]=]
     for i, move in ipairs(piece:getValidMoves()) do
         if piece.target.column == move.column and piece.target.row == move.row then
-            return true
+            return move
         end
     end
     return false

@@ -321,7 +321,7 @@ function King:checkCastle()
                         column = square.id.column,
                         row = square.id.row,
                         type = 'castle',
-                        direction = dir
+                        direction = dir 
                     })
                 end
                 break
@@ -333,7 +333,12 @@ function King:checkCastle()
 end
 
 function King:doCastle(move)
-    
+    local square = board:getSquare({move.column,move.row})
+    local rook = square.occupyingPeice
+    local column = self:_cc(self.location.column) + move.direction + move.direction
+    self.target.column = self:_cc(column)
+    rook.target = {column = self:_cc(column - move.direction), row = rook.location.row}
+    placePiece(rook)
 end
 
 ---------- construction end -----------------------------------------------------------------------

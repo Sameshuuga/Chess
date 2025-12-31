@@ -28,9 +28,7 @@ playerTurn = 'light'
 local squareSize = 65
 local timeLimit = 500 --in seconds
 
---- test zone ---
---- test zone ---
---- 
+
 function love.load()
     screen = Screen()
     board = ChessBoard(screen.center, squareSize)

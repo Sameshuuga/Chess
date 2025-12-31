@@ -141,7 +141,7 @@ end
 
 function isMoveValid(piece)
     --[=[ check validity of target move by comparing to piece:validMoves() ]=]
-    for i, move in ipairs(piece:validMoves()) do
+    for i, move in ipairs(piece:getValidMoves()) do
         if piece.target.column == move.column and piece.target.row == move.row then
             return true
         end
@@ -159,13 +159,4 @@ function capturePeice(piece)
         end
     end
     ui:buildCapDisplay()
-
-    print('Caplist: ')
-    for i, n in ipairs(Caplist) do
-        print(n.type, n.color)
-    end
-    -- print('Piecelist: ')
-    -- for i, n in ipairs(Piecelist) do
-    --     print(n.type)
-    -- end
 end

@@ -35,7 +35,7 @@ function ChessPeice:new(color, image, x, y, squareSize, location)
     self.active = false
     self.hasMoved = false
     self.location = { column = location[1], row = location[2] }
-    self.target= self.location
+    self.target = self.location
 end
 
 function ChessPeice:update(dt)
@@ -54,7 +54,7 @@ function ChessPeice:draw()
 
     if self.active == true then
         love.graphics.draw(self.activeImage, self.x, self.y, 0, self.scalefactor)
-        for i, move in pairs(self:validMoves()) do
+        for i, move in pairs(self:getValidMoves()) do
             for i, square in ipairs(board.squarelist) do
                 if move.column == square.id.column and
                     move.row == square.id.row then
@@ -66,7 +66,19 @@ function ChessPeice:draw()
 end
 
 function ChessPeice:getValidMoves()
-    local validMoves = self:validMoves()
+    --[=[ ]=]
+    local validMoves = {}
+    for i, move in ipairs(self:validMoves()) do
+        table.insert(validMoves, move)
+    end
+    if self.type == 'king' then
+        if self:checkCastle() then
+            for i, move in ipairs(self:checkCastle()) do
+                table.insert(validMoves, move)
+            end
+        end
+    end
+
     return validMoves
 end
 
@@ -102,28 +114,38 @@ function Pawn:new(color, x, y, squareSize, location)
     self.type = 'pawn'
 end
 
-function Pawn:validMoves()                              -- need to add double move option for fist move and limit diagonal to capture only
+function Pawn:validMoves()                         -- still need to avoid the brick, can be done by treating the empty square as if it is occupyed for one move
     local moves = {}
     local move = self.color == 'light' and 1 or -1 -- Light moves up, dark moves down
-    local firstmove = self.color == 'light' and 2 or -2
-    
+
     -- Forward move
     if self.hasMoved == false then
-        table.insert(moves,{column = self.location.column, row=self.location.row + firstmove})
-    end
-
-    local validRow = self.location.row + move
-    if validRow >= 1 and validRow <= 8 then
-        table.insert(moves, { column = self.location.column, row = validRow })
-    end
-
-    -- Diagonal captures
-    for i, offset in ipairs({ -1, 1 }) do
-        local validColumn = self:_cc(self.location.column) + offset
-        if validColumn >= 1 and validColumn <= 8 then
-            table.insert(moves, { column = self:_cc(validColumn), row = validRow })
+        local firstmove = self.color == 'light' and 2 or -2
+        local moveSquare = board:getSquare({ self.location.column, self.location.row + firstmove })
+        if moveSquare.occupyingPeice == 'none' then
+            table.insert(moves, moveSquare.id)
         end
     end
+    local validRow = self.location.row + move
+    if validRow >= 1 and validRow <= 8 then
+        local moveSquare = board:getSquare({ self.location.column, validRow })
+        if moveSquare.occupyingPeice == 'none' then
+            table.insert(moves, moveSquare.id)
+        end
+
+        -- Diagonal captures
+        for i, offset in ipairs({ -1, 1 }) do
+            local validColumn = self:_cc(self.location.column) + offset
+            if validColumn >= 1 and validColumn <= 8 then
+                local capSquare = board:getSquare({ self:_cc(validColumn), validRow })
+                if capSquare.occupyingPeice ~= 'none'
+                    and capSquare.occupyingPeice.color ~= self.color then
+                    table.insert(moves, capSquare.id)
+                end
+            end
+        end
+    end
+
 
     return moves
 end
@@ -145,7 +167,10 @@ function Knight:validMoves()
         local validColumn = self:_cc(self.location.column) + offset[1]
         local validRow = self.location.row + offset[2]
         if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
-            table.insert(moves, { column = self:_cc(validColumn), row = validRow })
+            local moveSquare = board:getSquare({ self:_cc(validColumn), validRow })
+            if moveSquare.occupyingPeice.color ~= self.color then
+                table.insert(moves, moveSquare.id)
+            end
         end
     end
     return moves
@@ -166,7 +191,14 @@ function Bishop:validMoves()
             local validColumn = self:_cc(self.location.column) + dir[1] * v
             local validRow = self.location.row + dir[2] * v
             if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
-                table.insert(moves, { column = self:_cc(validColumn), row = validRow })
+                local moveSquare = board:getSquare({ self:_cc(validColumn), validRow })
+                if moveSquare.occupyingPeice.color == self.color then
+                    break
+                elseif moveSquare.occupyingPeice ~= 'none' and moveSquare.occupyingPeice.color ~= self.color then
+                    table.insert(moves, moveSquare.id)
+                    break
+                end
+                table.insert(moves, moveSquare.id)
             else
                 break
             end
@@ -190,7 +222,14 @@ function Rook:validMoves()
             local validColumn = self:_cc(self.location.column) + dir[1] * v
             local validRow = self.location.row + dir[2] * v
             if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
-                table.insert(moves, { column = self:_cc(validColumn), row = validRow })
+                local moveSquare = board:getSquare({ self:_cc(validColumn), validRow })
+                if moveSquare.occupyingPeice.color == self.color then
+                    break
+                elseif moveSquare.occupyingPeice ~= 'none' and moveSquare.occupyingPeice.color ~= self.color then
+                    table.insert(moves, moveSquare.id)
+                    break
+                end
+                table.insert(moves, moveSquare.id)
             else
                 break
             end
@@ -218,7 +257,14 @@ function Queen:validMoves()
             local validColumn = self:_cc(self.location.column) + dir[1] * v
             local validRow = self.location.row + dir[2] * v
             if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
-                table.insert(moves, { column = self:_cc(validColumn), row = validRow })
+                local moveSquare = board:getSquare({ self:_cc(validColumn), validRow })
+                if moveSquare.occupyingPeice.color == self.color then
+                    break
+                elseif moveSquare.occupyingPeice ~= 'none' and moveSquare.occupyingPeice.color ~= self.color then
+                    table.insert(moves, moveSquare.id)
+                    break
+                end
+                table.insert(moves, moveSquare.id)
             else
                 break
             end
@@ -241,57 +287,53 @@ function King:validMoves()
         { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 },  -- Horizontal and vertical directions
         { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } -- Diagonal directions
     }
-    for i, dir in ipairs(directions) do
+    for i, dir in ipairs(directions) do            -- normal moves
         local validColumn = self:_cc(self.location.column) + dir[1]
         local validRow = self.location.row + dir[2]
         if validColumn >= 1 and validColumn <= 8 and validRow >= 1 and validRow <= 8 then
-            table.insert(moves, { column = self:_cc(validColumn), row = validRow })
+            local moveSquare = board:getSquare({ self:_cc(validColumn), validRow })
+            if moveSquare.occupyingPeice.color ~= self.color then
+                table.insert(moves, moveSquare.id)
+            end
         end
     end
     return moves
 end
 
----------- under construction -----------------------------------------------------------------------
-function King:castle(rook)
-    -- Ensure the king and rook haven't moved
-    if self.hasMoved or rook.hasMoved then
+---------- under construction (working, might need improving) --------------------------------------------
+function King:checkCastle()
+    --[=[ checks if castle is a valid move. Returns list of avialiable castle moves,
+            includes 'type' and 'direction' in the move data to be used by :docastle()]=]
+    if self.hasMoved then
         return false
     end
+    local moves = {}
+    local directions = { 1, -1 }
 
-    -- Ensure the rook is in the same row as the king
-    if self.location.row ~= rook.location.row then
-        return false
-    end
-
-    -- Determine the direction of the castle
-    local direction = self:_cc(rook.location.column) > self:_cc(self.location.column)
-        and 1 or -1
-
-    -- Check if the path between the king and rook is clear
-    local column = self:_cc(self.location.column) + direction
-    while column ~= self:_cc(rook.location.column) do
-        local square = board:getSquare(self:_cc(column), self.location.row)
-        if square.isOccupied then
-            return false
+    for i, dir in ipairs(directions) do -- efficentcy improvment idea: make a list of all squares to check and run the getSquare loop once to return them all 
+        local column = self:_cc(self.location.column)
+        while column >= 1 and column <= 8 do
+            column = column + dir
+            local square = board:getSquare({ self:_cc(column), self.location.row })
+            if square.occupyingPeice ~= 'none' then
+                if square.occupyingPeice.type == 'rook' and square.occupyingPeice.hasMoved == false then
+                    table.insert(moves, {
+                        column = square.id.column,
+                        row = square.id.row,
+                        type = 'castle',
+                        direction = dir
+                    })
+                end
+                break
+            end
         end
-        column = column + direction
     end
 
-    -- Move the king two squares toward the rook
-    if direction == 1 then
-        self.location.column = self:_cc(self:_cc(self.location.column) + 2)
-    else
-        self.location.column = self:_cc(self:_cc(self.location.column) - 2)
-    end
-    self.location.row = rook.location.row
-    self.hasMoved = true
+    return moves
+end
 
-    -- Move the rook to the square next to the king
-    rook.location.column = self:_cc(self:_cc(self.location.column) - direction)
-    rook.hasMoved = true
-
-    print('castled')
-    return true
+function King:doCastle(move)
+    
 end
 
 ---------- construction end -----------------------------------------------------------------------

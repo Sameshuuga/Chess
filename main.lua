@@ -39,6 +39,8 @@ function love.load()
     timer1 = Timer(timeLimit, ui.timer1[1], ui.timer1[2])
     timer2 = Timer(timeLimit, ui.timer2[1], ui.timer2[2])
 
+    table.insert(Piecelist, ChessSet.Bishop('dark', 0,0,squareSize,{'e',4}))
+
     makeStartingPieces(ChessSet, squareSize)
     setupBoard()
 end

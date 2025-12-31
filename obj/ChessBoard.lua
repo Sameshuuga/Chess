@@ -57,6 +57,10 @@ function ChessBoard:new(center, squareSize, w, h)
         color = (color == 'dark') and 'light' or 'dark'
         y = y + squareSize --next row
     end
+
+    -- for i, square  in ipairs(self.squarelist) do
+    --     print (square.id.column,square.id.row)
+    -- end
 end
 
 function ChessBoard:draw()

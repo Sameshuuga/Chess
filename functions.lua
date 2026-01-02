@@ -1,12 +1,11 @@
 -- shared functions to hide clutter
 function shallowcopy(orig)
     local copy = {}
-    for k, v in pairs(orig) do
-        copy[k] = v
+    for i, item in pairs(orig) do
+        copy[i] = item
     end
     return copy
 end
-
 
 function check_collision(a, b)
     return a.right > b.left
@@ -23,23 +22,25 @@ function makeStartingPieces(ChessSet, squareSize)
         it constructs new pieces based on what is passed ]=]
     local startingPieces = {
         Pawn = {
-            light = { { 'a', 2 }, { 'b', 2 }, { 'c', 2 }, { 'd', 2 }, { 'e', 2 }, { 'f', 2 }, { 'g', 2 }, { 'h', 2 } },
-            dark = { { 'a', 7 }, { 'b', 7 }, { 'c', 7 }, { 'd', 7 }, { 'e', 7 }, { 'f', 7 }, { 'g', 7 }, { 'h', 7 } },
+            light = { { 'a', 2 }, { 'b', 2 }, { 'c', 2 }, { 'd', 2 }, { 'e', 2 },
+                { 'f', 2 }, { 'g', 2 }, { 'h', 2 } },
+            dark = { { 'a', 7 }, { 'b', 7 }, { 'c', 7 }, { 'd', 7 }, { 'e', 7 },
+                { 'f', 7 }, { 'g', 7 }, { 'h', 7 } },
         },
         Rook = {
             light = { { 'a', 1 }, { 'h', 1 } },
             dark = { { 'a', 8 }, { 'h', 8 } },
         },
         Knight = {
---            light = { { 'b', 1 }, { 'g', 1 } },
+            --            light = { { 'b', 1 }, { 'g', 1 } },
             dark = { { 'b', 8 }, { 'g', 8 } },
         },
         Bishop = {
---            light = { { 'c', 1 },{ 'f', 1 } },
+            --            light = { { 'c', 1 },{ 'f', 1 } },
             dark = { { 'c', 8 }, { 'f', 8 } },
         },
         Queen = {
-  --          light = { { 'd', 1 } },
+            --          light = { { 'd', 1 } },
             dark = { { 'd', 8 } },
         },
         King = {
@@ -107,8 +108,10 @@ function drop()
         if piece.active then
             piece.moving = false
             for i, square in ipairs(board.squarelist) do --find&link target square and then break
-                if square.center.x >= piece.left and square.center.x < piece.right and
-                    square.center.y >= piece.top and square.center.y < piece.bottom then
+                if square.center.x >= piece.left
+                    and square.center.x < piece.right
+                    and square.center.y >= piece.top
+                    and square.center.y < piece.bottom then
                     piece.target = shallowcopy(square.id)
                     break
                 end
@@ -138,7 +141,7 @@ function placePiece(piece)
         if targetSquare.occupyingPeice ~= 'none' then
             capturePeice(targetSquare.occupyingPeice)
         end
-        
+
         targetSquare.occupyingPeice = piece
         piece.location = shallowcopy(piece.target)
         piece.x, piece.y = targetSquare.topLeft[1], targetSquare.topLeft[2]

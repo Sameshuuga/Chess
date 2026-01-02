@@ -37,7 +37,7 @@ function love.load()
     timer1 = Timer(timeLimit, ui.timer1[1], ui.timer1[2])
     timer2 = Timer(timeLimit, ui.timer2[1], ui.timer2[2])
 
-    table.insert(Piecelist, ChessSet.Bishop('dark', 0,0,squareSize,{'e',4}))
+    table.insert(Piecelist, ChessSet.Bishop('dark', 0, 0, squareSize, { 'e', 4 }))
 
     makeStartingPieces(ChessSet, squareSize)
     setupBoard()
@@ -47,7 +47,7 @@ function love.update(dt)
     for i, peice in ipairs(Piecelist) do
         peice:update(dt)
     end
-
+    board:clearBrick(playerTurn)
     if gamestart then
         if playerTurn == 'dark' then
             timer1:update(dt)
@@ -64,7 +64,7 @@ function love.draw()
     end
 
     timer1:draw(); timer2:draw()
-    
+
     ui:draw()
     screen:draw()
 end

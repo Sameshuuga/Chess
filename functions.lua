@@ -137,12 +137,19 @@ function placePiece(piece)
             piece:doCastle(move)
             targetSquare = board:getSquare(piece.target)
         end
-        -- print(targetSquare.id.column,targetSquare.id.row)
-        if targetSquare.occupyingPeice ~= 'none' then
-            capturePeice(targetSquare.occupyingPeice)
+        if move.type == "doublePawn" then -- set enPassant flag
+            local square = board:getSquare(move.brick)
+            square.enPassant = move.piece
+            -- print(square.enPassant.type, square.id.column, square.id.row)
         end
-
+        if targetSquare.occupyingPeice ~= 'none' or targetSquare.enPassant then
+            local cappiece = targetSquare.enPassant or targetSquare.occupyingPeice
+            print(cappiece.type)
+            print('cap')
+            capturePeice(cappiece)
+        end
         targetSquare.occupyingPeice = piece
+
         piece.location = shallowcopy(piece.target)
         piece.x, piece.y = targetSquare.topLeft[1], targetSquare.topLeft[2]
         piece.active = false; piece.hasMoved = true
@@ -169,6 +176,7 @@ end
 function capturePeice(piece)
     --[=[ take a Peice add it to cap list and remove it from Peicelist ]=]
     table.insert(Caplist, piece)
+    board:getSquare(piece.location).occupyingPeice = 'none'
     for i = #Piecelist, 1, -1 do
         if Piecelist[i] == piece then
             table.remove(Piecelist, i)

@@ -79,6 +79,15 @@ function ChessBoard:getSquare(id)
     error('Square not found')
 end
 
+function ChessBoard:clearBrick(color)
+    for i, square in ipairs(self.squarelist) do
+        if square.enPassant and square.enPassant.color == color then
+            square.enPassant = false
+            break
+        end
+    end
+end
+
 -----------------------------------------------------------
 -- Square
 -----------------------------------------------------------
@@ -89,6 +98,9 @@ function Square:new(id, x, y, squareSize, color)
     self.scalingfactor = squareSize / self.image:getWidth()
 
     self.occupyingPeice = nil
+    if id.row == 2 or id.row == 7 then
+        self.enPassant = false
+    end
 
     self.id = id
     self.x = x

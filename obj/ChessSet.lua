@@ -121,6 +121,7 @@ end
 function Pawn:validMoves()                         -- still need to avoid the brick, can be done by treating the empty square as if it is occupyed for one move
     local moves = {}
     local move = self.color == 'light' and 1 or -1 -- Light moves up, dark moves down
+    local validRow = self.location.row + move
 
     -- Forward move
     if self.hasMoved == false then
@@ -128,10 +129,17 @@ function Pawn:validMoves()                         -- still need to avoid the br
         local moveSquare = board:getSquare(
             { self.location.column, self.location.row + firstmove })
         if moveSquare.occupyingPeice == 'none' then
-            table.insert(moves, moveSquare.id)
+            table.insert(moves,
+                {
+                    column = moveSquare.id.column,
+                    row = moveSquare.id.row,
+                    type = 'doublePawn',
+                    brick = { self.location.column, validRow },
+                    piece = self
+                }
+            )
         end
     end
-    local validRow = self.location.row + move
     if validRow >= 1 and validRow <= 8 then
         local moveSquare = board:getSquare({ self.location.column, validRow })
         if moveSquare.occupyingPeice == 'none' then
@@ -146,6 +154,10 @@ function Pawn:validMoves()                         -- still need to avoid the br
                     { self:_cc(validColumn), validRow })
                 if capSquare.occupyingPeice ~= 'none'
                     and capSquare.occupyingPeice.color ~= self.color then
+                    table.insert(moves, capSquare.id)
+                end
+                if capSquare.enPassant then
+                    -- and capSquare.enPassant.color ~= self.color then
                     table.insert(moves, capSquare.id)
                 end
             end

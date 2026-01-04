@@ -32,15 +32,15 @@ function makeStartingPieces(ChessSet, squareSize)
             dark = { { 'a', 8 }, { 'h', 8 } },
         },
         Knight = {
-            --            light = { { 'b', 1 }, { 'g', 1 } },
+            light = { { 'b', 1 }, { 'g', 1 } },
             dark = { { 'b', 8 }, { 'g', 8 } },
         },
         Bishop = {
-            --            light = { { 'c', 1 },{ 'f', 1 } },
+            light = { { 'c', 1 }, { 'f', 1 } },
             dark = { { 'c', 8 }, { 'f', 8 } },
         },
         Queen = {
-            --          light = { { 'd', 1 } },
+            light = { { 'd', 1 } },
             dark = { { 'd', 8 } },
         },
         King = {
@@ -144,8 +144,8 @@ function placePiece(piece)
         end
         if targetSquare.occupyingPeice ~= 'none' or targetSquare.enPassant then
             local cappiece = targetSquare.enPassant or targetSquare.occupyingPeice
-            print(cappiece.type)
-            print('cap')
+            -- print(cappiece.type)
+            -- print('cap')
             capturePeice(cappiece)
         end
         targetSquare.occupyingPeice = piece
@@ -184,4 +184,20 @@ function capturePeice(piece)
         end
     end
     ui:buildCapDisplay()
+end
+
+function isUnderAttack(square)
+    --[=[ checks if a given square is under attack by an opposing piece ]=]
+    for i, piece in ipairs(Piecelist) do
+        if piece.color ~= playerTurn and piece.type ~= 'king' then --[[temp. will need to check king squares eventually
+                                                                        currently causes infinite recursion]]
+            for i, move in ipairs(piece:getValidMoves()) do
+                if move.column == square.id.column
+                    and move.row == square.id.row then
+                    return true
+                end
+            end
+        end
+    end
+    return false
 end

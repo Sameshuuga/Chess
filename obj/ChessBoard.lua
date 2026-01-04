@@ -98,9 +98,6 @@ function Square:new(id, x, y, squareSize, color)
     self.scalingfactor = squareSize / self.image:getWidth()
 
     self.occupyingPeice = nil
-    if id.row == 2 or id.row == 7 then
-        self.enPassant = false
-    end
 
     self.id = id
     self.x = x

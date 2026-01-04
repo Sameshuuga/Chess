@@ -125,9 +125,10 @@ function Pawn:validMoves()                         -- still need to avoid the br
 
     -- Forward move
     if self.hasMoved == false then
-        local firstmove = self.color == 'light' and 2 or -2
+        local firstmove = (self.color == 'light') and 2 or -2
         local moveSquare = board:getSquare(
             { self.location.column, self.location.row + firstmove })
+
         if moveSquare.occupyingPeice == 'none' then
             table.insert(moves,
                 {
@@ -322,7 +323,8 @@ function King:validMoves()
             and validRow >= 1 and validRow <= 8 then
             local moveSquare = board:getSquare(
                 { self:_cc(validColumn), validRow })
-            if moveSquare.occupyingPeice.color ~= self.color then
+            if moveSquare.occupyingPeice.color ~= self.color
+                and not isUnderAttack(moveSquare) then
                 table.insert(moves, moveSquare.id)
             end
         end
@@ -334,7 +336,7 @@ end
 function King:checkCastle()
     --[=[ checks if castle is a valid move. Returns list of avialiable castle moves,
             includes 'type' and 'direction' in the move data to be used by :docastle()]=]
-    if self.hasMoved then
+    if self.hasMoved or self:check() then
         return false
     end
     local moves = {}
@@ -345,6 +347,9 @@ function King:checkCastle()
         while column >= 1 and column <= 8 do
             column = column + dir
             local square = board:getSquare({ self:_cc(column), self.location.row })
+            if isUnderAttack(square) and square.id.column ~= 'b' then
+                break
+            end
             if square.occupyingPeice ~= 'none' then
                 if square.occupyingPeice.type == 'rook'
                     and square.occupyingPeice.hasMoved == false then
@@ -373,6 +378,15 @@ function King:doCastle(move)
         row = rook.location.row
     }
     placePiece(rook)
+end
+
+function King:check()
+    local square = board:getSquare(self.location)
+    if isUnderAttack(square) then
+        return true
+    end
+
+    return false
 end
 
 ---------- construction end -----------------------------------------------------------------------

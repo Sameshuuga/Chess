@@ -1,4 +1,4 @@
-This is a game of chess written in lua using the Love2d framework.
+This is a game of chess written in lua using the Love2d framework. This is a work in progress. 
 
 Development Notes:
 * peice.location and peice.target are the main points of manipulation

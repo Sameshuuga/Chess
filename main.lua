@@ -46,7 +46,16 @@ end
 function love.update(dt)
     for i, peice in ipairs(Piecelist) do
         peice:update(dt)
+
+        -- Promote if needed, temp code until piece selection is added
+        if peice.type == "pawn" and peice.location.row == 8 and peice.color == 'light' then
+            peice:promote('Queen', ChessSet, squareSize)
+        end
+        if peice.type == "pawn" and peice.location.row == 1 and peice.color == 'dark' then
+            peice:promote('Queen', ChessSet, squareSize)
+        end
     end
+
     if gamestart then
         if playerTurn == 'dark' then
             timer1:update(dt)

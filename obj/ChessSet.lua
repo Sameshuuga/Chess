@@ -1,12 +1,12 @@
-local ChessPeice = Object:extend()
-local Pawn = ChessPeice:extend()
-local Knight = ChessPeice:extend()
-local Bishop = ChessPeice:extend()
-local Rook = ChessPeice:extend()
-local Queen = ChessPeice:extend()
-local King = ChessPeice:extend()
+local ChessPiece = Object:extend()
+local Pawn = ChessPiece:extend()
+local Knight = ChessPiece:extend()
+local Bishop = ChessPiece:extend()
+local Rook = ChessPiece:extend()
+local Queen = ChessPiece:extend()
+local King = ChessPiece:extend()
 
-function ChessPeice:new(color, image, x, y, squareSize, location)
+function ChessPiece:new(color, image, x, y, squareSize, location)
     --[=[ Class for creation of chesspeices. Each peice is a subclass of ChessPeice. Pass
         color, location of the center point (x,y), and squareSize]=]
 
@@ -41,7 +41,7 @@ function ChessPeice:new(color, image, x, y, squareSize, location)
     self.target = self.location
 end
 
-function ChessPeice:update(dt)
+function ChessPiece:update(dt)
     if self.moving == true then
         local x, y = love.mouse.getPosition()
         self.x = x - self.squareSize / 2
@@ -52,7 +52,7 @@ function ChessPeice:update(dt)
     self.bottom = self.y + self.squareSize; self.right = self.x + self.squareSize
 end
 
-function ChessPeice:draw()
+function ChessPiece:draw()
     love.graphics.draw(self.image, self.x, self.y, 0, self.scalefactor)
 
     if self.active == true then
@@ -69,7 +69,7 @@ function ChessPeice:draw()
     end
 end
 
-function ChessPeice:getValidMoves()
+function ChessPiece:getValidMoves()
     --[=[ ]=]
     local validMoves = {}
     for i, move in ipairs(self:validMoves()) do
@@ -86,7 +86,7 @@ function ChessPeice:getValidMoves()
     return validMoves
 end
 
-function ChessPeice:_cc(value)
+function ChessPiece:_cc(value)
     --[=[ Convert Column ]=]
     local converter = {
         a = 1,
@@ -165,8 +165,22 @@ function Pawn:validMoves()                         -- still need to avoid the br
         end
     end
 
-
     return moves
+end
+
+function Pawn:promote(type, ChessSet, squareSize)
+    --[=[ Promote pawn, remove pawn from piece list and add
+        the new piece ]=]
+    local piece = ChessSet[type](
+        self.color, 0, 0, squareSize, { self.location.column, self.location.row })
+    placePiece(piece)
+    table.insert(Piecelist, piece)
+    for i = #Piecelist, 1, -1 do
+        if Piecelist[i] == self then
+            table.remove(Piecelist, i)
+            break
+        end
+    end
 end
 
 ---------------------------------------------------------------------------------------
